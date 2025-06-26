@@ -37,7 +37,20 @@ class QuoteService: ObservableObject {
     
     // Make this method public for widget use
     func getRandomQuote() async throws -> DailyQuote {
-        // Get a random quote with author and category
+        // First, get the total count of quotes
+        let countResponse = try await supabase
+            .from("quotes")
+            .select("id", head: true, count: .exact)
+            .execute()
+        
+        guard let totalCount = countResponse.count, totalCount > 0 else {
+            throw QuoteServiceError.noQuotesFound
+        }
+        
+        // Generate a random offset
+        let randomOffset = Int.random(in: 0..<totalCount)
+        
+        // Get a quote with the random offset
         let response: [DailyQuote] = try await supabase
             .from("quotes")
             .select("""
@@ -45,8 +58,7 @@ class QuoteService: ObservableObject {
                 authors!inner(*),
                 categories!inner(*)
             """)
-            .order("random()")
-            .limit(1)
+            .range(from: randomOffset, to: randomOffset)
             .execute()
             .value
         
