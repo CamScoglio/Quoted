@@ -8,6 +8,7 @@
 import WidgetKit
 import SwiftUI
 import Intents
+import AppIntents
 
 // MARK: - Widget Timeline Provider
 struct QuotedWidgetProvider: TimelineProvider {
@@ -47,14 +48,23 @@ struct QuotedWidgetProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuotedWidgetEntry>) -> Void) {
         Task {
             do {
-                let dailyQuote = try await quoteService.getTodaysQuote()
+                let dailyQuote: DailyQuote
+                
+                if context.isPreview {
+                    // Use placeholder for preview
+                    dailyQuote = placeholder(in: context).dailyQuote
+                } else {
+                    // Get a random quote for each refresh (including Next button taps)
+                    dailyQuote = try await quoteService.getRandomQuote()
+                }
+                
                 let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote)
                 
-                // Refresh at midnight tomorrow
-                let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-                let midnight = Calendar.current.startOfDay(for: tomorrow)
+                // Set next refresh for 24 hours from now to maintain daily update cycle
+                let nextRefresh = Date().addingTimeInterval(24 * 60 * 60)
                 
-                let timeline = Timeline(entries: [entry], policy: .after(midnight))
+                // Use .atEnd policy to allow manual refreshes via the Next button
+                let timeline = Timeline(entries: [entry], policy: .after(nextRefresh))
                 completion(timeline)
                 
             } catch {
@@ -83,6 +93,27 @@ struct QuotedWidgetSmallView: View {
             backgroundGradient
             
             VStack(spacing: 8) {
+                // Next button
+                HStack {
+                    Spacer()
+                    Button(intent: NextQuoteIntent()) {
+                        HStack(spacing: 4) {
+                            Text("Next")
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                            Image(systemName: "arrow.right")
+                                .font(.caption2)
+                        }
+                        .foregroundColor(.white.opacity(0.9))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(.white.opacity(0.2))
+                        )
+                    }
+                }
+                
                 // Quote icon
                 Image(systemName: "quote.bubble.fill")
                     .font(.title2)
@@ -94,7 +125,7 @@ struct QuotedWidgetSmallView: View {
                     .fontWeight(.medium)
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
-                    .lineLimit(4)
+                    .lineLimit(3)
                 
                 Spacer()
                 
@@ -144,11 +175,16 @@ struct QuotedWidgetMediumView: View {
             
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 12) {
-                    // Category badge
+                    // Next button
                     HStack {
-                        Text(entry.dailyQuote.category.name.uppercased())
-                            .font(.caption2)
-                            .fontWeight(.bold)
+                        Button(intent: NextQuoteIntent()) {
+                            HStack(spacing: 4) {
+                                Text("Next")
+                                    .font(.caption2)
+                                    .fontWeight(.semibold)
+                                Image(systemName: "arrow.right")
+                                    .font(.caption2)
+                            }
                             .foregroundColor(.white.opacity(0.9))
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -156,6 +192,7 @@ struct QuotedWidgetMediumView: View {
                                 RoundedRectangle(cornerRadius: 8)
                                     .fill(.white.opacity(0.2))
                             )
+                        }
                         
                         Spacer()
                         
@@ -224,7 +261,7 @@ struct QuotedWidgetLargeView: View {
                 // Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("TODAY'S QUOTE")
+                        Text("DAILY QUOTE")
                             .font(.caption2)
                             .fontWeight(.bold)
                             .foregroundColor(.white.opacity(0.8))
@@ -236,10 +273,15 @@ struct QuotedWidgetLargeView: View {
                     
                     Spacer()
                     
-                    // Category badge
-                    Text(entry.dailyQuote.category.name.uppercased())
-                        .font(.caption2)
-                        .fontWeight(.bold)
+                    // Next button
+                    Button(intent: NextQuoteIntent()) {
+                        HStack(spacing: 6) {
+                            Text("Next")
+                                .font(.caption2)
+                                .fontWeight(.semibold)
+                            Image(systemName: "arrow.right")
+                                .font(.caption2)
+                        }
                         .foregroundColor(.white.opacity(0.9))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
@@ -247,6 +289,7 @@ struct QuotedWidgetLargeView: View {
                             RoundedRectangle(cornerRadius: 10)
                                 .fill(.white.opacity(0.2))
                         )
+                    }
                 }
                 
                 Spacer()
