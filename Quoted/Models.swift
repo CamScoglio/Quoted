@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import WidgetKit
+import AppIntents
 
 struct Quote: Codable, Identifiable {
     let id: UUID
@@ -95,6 +97,25 @@ struct Category: Codable, Identifiable {
         case id, name, icon
         case themeColor = "theme_color"
         case createdAt = "created_at"
+    }
+}
+
+// MARK: - App Intents
+struct NextQuoteIntent: AppIntent {
+    static var title: LocalizedStringResource { "Next Quote" }
+    static var description: IntentDescription { "Get the next random quote" }
+    
+    func perform() async throws -> some IntentResult {
+        print("🔵 NextQuoteIntent: Button was tapped!")
+        print("🔵 NextQuoteIntent: About to reload widget timeline...")
+        
+        // Reload all widgets of this kind to fetch a new random quote
+        WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+        
+        print("🔵 NextQuoteIntent: Widget timeline reload requested")
+        print("🔵 NextQuoteIntent: Intent completed successfully")
+        
+        return .result()
     }
 }
 

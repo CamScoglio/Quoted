@@ -19,24 +19,28 @@ struct QuotedWidgetProvider: TimelineProvider {
         QuotedWidgetEntry(
             date: Date(),
             dailyQuote: DailyQuote(
-                quote: Quote(
-                    id: UUID(),
-                    quoteText: "The only way to do great work is to love what you do.",
-                    authorId: UUID(),
-                    categoryId: UUID(),
-                    designTheme: "minimal",
-                    backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
-                    isFeatured: true,
-                    createdAt: Date()
-                ),
-                author: Author(
+                id: UUID(),
+                quoteText: "The only way to do great work is to love what you do.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
                     id: UUID(),
                     name: "Steve Jobs",
                     profession: "Entrepreneur",
                     bio: nil,
                     imageUrl: nil
                 ),
-                category: Category(id: UUID(), name: "Motivation", color: "#667eea")
+                categories: Category(
+                    id: UUID(),
+                    name: "Motivation",
+                    icon: "lightbulb.fill",
+                    themeColor: "#667eea",
+                    createdAt: Date()
+                )
             )
         )
     }
@@ -113,11 +117,6 @@ struct QuotedWidgetProvider: TimelineProvider {
         print("🟡 getRandomQuote: Successfully got quote with ID: \(randomQuote.quote.id)")
         return randomQuote
     }
-}
-
-enum QuoteServiceError: Error {
-    case noQuotesFound
-    case networkError
 }
 
 // MARK: - Widget Entry
@@ -468,24 +467,28 @@ struct QuotedWidget_Previews: PreviewProvider {
         let sampleEntry = QuotedWidgetEntry(
             date: Date(),
             dailyQuote: DailyQuote(
-                quote: Quote(
-                    id: UUID(),
-                    quoteText: "The only way to do great work is to love what you do.",
-                    authorId: UUID(),
-                    categoryId: UUID(),
-                    designTheme: "minimal",
-                    backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
-                    isFeatured: true,
-                    createdAt: Date()
-                ),
-                author: Author(
+                id: UUID(),
+                quoteText: "The only way to do great work is to love what you do.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
                     id: UUID(),
                     name: "Steve Jobs",
                     profession: "Entrepreneur",
                     bio: nil,
                     imageUrl: nil
                 ),
-                category: Category(id: UUID(), name: "Motivation", color: "#667eea")
+                categories: Category(
+                    id: UUID(),
+                    name: "Motivation",
+                    icon: "lightbulb.fill",
+                    themeColor: "#667eea",
+                    createdAt: Date()
+                )
             )
         )
         
