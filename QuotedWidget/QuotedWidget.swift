@@ -8,6 +8,7 @@
 import WidgetKit
 import SwiftUI
 import Intents
+import AppIntents
 
 // MARK: - Widget Timeline Provider
 struct QuotedWidgetProvider: TimelineProvider {
@@ -47,11 +48,25 @@ struct QuotedWidgetProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuotedWidgetEntry>) -> Void) {
         Task {
             do {
-                let dailyQuote = try await quoteService.getTodaysQuote()
-                let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote)
+                // Check if this is user-triggered (recent refresh) or scheduled
+                let now = Date()
+                let lastMidnight = Calendar.current.startOfDay(for: now)
+                let timeSinceLastMidnight = now.timeIntervalSince(lastMidnight)
                 
-                // Refresh at midnight tomorrow
-                let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+                let dailyQuote: DailyQuote
+                
+                // If it's been less than 5 minutes since any timeline refresh, 
+                // assume it's user-triggered and get a random quote
+                if context.isPreview || timeSinceLastMidnight < 300 {
+                    dailyQuote = try await quoteService.getRandomQuote()
+                } else {
+                    dailyQuote = try await quoteService.getTodaysQuote()
+                }
+                
+                let entry = QuotedWidgetEntry(date: now, dailyQuote: dailyQuote)
+                
+                // Refresh at midnight tomorrow (keep 24-hour schedule)
+                let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: now) ?? now
                 let midnight = Calendar.current.startOfDay(for: tomorrow)
                 
                 let timeline = Timeline(entries: [entry], policy: .after(midnight))
@@ -108,6 +123,13 @@ struct QuotedWidgetSmallView: View {
             .padding(12)
         }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .onTapGesture(count: 2) {
+            // Double-tap to refresh quote
+            let intent = RefreshQuoteIntent()
+            Task {
+                _ = try? await intent.perform()
+            }
+        }
     }
     
     private var truncatedQuote: String {
@@ -191,6 +213,13 @@ struct QuotedWidgetMediumView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .onTapGesture(count: 2) {
+            // Double-tap to refresh quote
+            let intent = RefreshQuoteIntent()
+            Task {
+                _ = try? await intent.perform()
+            }
+        }
     }
     
     private var backgroundGradient: some View {
@@ -283,6 +312,13 @@ struct QuotedWidgetLargeView: View {
             .padding(20)
         }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .onTapGesture(count: 2) {
+            // Double-tap to refresh quote
+            let intent = RefreshQuoteIntent()
+            Task {
+                _ = try? await intent.perform()
+            }
+        }
     }
     
     private var formattedDate: String {
@@ -341,7 +377,7 @@ struct QuotedWidget: Widget {
                 }
         }
         .configurationDisplayName("Daily Quote")
-        .description("Get inspired with a new quote every day.")
+        .description("Get inspired with a new quote every day. Double-tap to get a new quote!")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

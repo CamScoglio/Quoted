@@ -35,7 +35,8 @@ class QuoteService: ObservableObject {
         }
     }
     
-    private func getRandomQuote() async throws -> DailyQuote {
+    // Make this public so it can be called from the widget
+    func getRandomQuote() async throws -> DailyQuote {
         // Get a random quote with author and category
         let response: [DailyQuote] = try await supabase
             .from("quotes")

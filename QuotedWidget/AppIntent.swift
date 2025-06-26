@@ -16,3 +16,14 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
     @Parameter(title: "Favorite Emoji", default: "😃")
     var favoriteEmoji: String
 }
+
+struct RefreshQuoteIntent: AppIntent {
+    static var title: LocalizedStringResource = "Refresh Quote"
+    static var description = IntentDescription("Get a new random quote")
+    
+    func perform() async throws -> some IntentResult {
+        // Trigger widget refresh
+        WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+        return .result()
+    }
+}
