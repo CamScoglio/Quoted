@@ -35,7 +35,8 @@ class QuoteService: ObservableObject {
         }
     }
     
-    private func getRandomQuote() async throws -> DailyQuote {
+    // Make this method public for widget use
+    func getRandomQuote() async throws -> DailyQuote {
         // Get a random quote with author and category
         let response: [DailyQuote] = try await supabase
             .from("quotes")
@@ -44,6 +45,7 @@ class QuoteService: ObservableObject {
                 authors!inner(*),
                 categories!inner(*)
             """)
+            .order("random()")
             .limit(1)
             .execute()
             .value

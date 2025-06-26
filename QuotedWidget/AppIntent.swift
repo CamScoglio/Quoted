@@ -13,8 +13,15 @@ struct NextQuoteIntent: AppIntent {
     static var description: IntentDescription { "Get the next random quote" }
     
     func perform() async throws -> some IntentResult {
+        print("🔵 NextQuoteIntent: Button was tapped!")
+        print("🔵 NextQuoteIntent: About to reload widget timeline...")
+        
         // Reload all widgets of this kind to fetch a new random quote
         WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+        
+        print("🔵 NextQuoteIntent: Widget timeline reload requested")
+        print("🔵 NextQuoteIntent: Intent completed successfully")
+        
         return .result()
     }
 }

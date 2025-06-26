@@ -9,10 +9,11 @@ import WidgetKit
 import SwiftUI
 import Intents
 import AppIntents
+import Supabase
 
 // MARK: - Widget Timeline Provider
 struct QuotedWidgetProvider: TimelineProvider {
-    private let quoteService = QuoteService()
+    private let supabase = SupabaseManager.shared.client
     
     func placeholder(in context: Context) -> QuotedWidgetEntry {
         QuotedWidgetEntry(
@@ -46,16 +47,23 @@ struct QuotedWidgetProvider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuotedWidgetEntry>) -> Void) {
+        print("🟢 Widget Timeline: getTimeline called!")
+        print("🟢 Widget Timeline: Context isPreview: \(context.isPreview)")
+        
         Task {
             do {
                 let dailyQuote: DailyQuote
                 
                 if context.isPreview {
+                    print("🟢 Widget Timeline: Using placeholder for preview")
                     // Use placeholder for preview
                     dailyQuote = placeholder(in: context).dailyQuote
                 } else {
-                    // Get a random quote for each refresh (including Next button taps)
-                    dailyQuote = try await quoteService.getRandomQuote()
+                    print("🟢 Widget Timeline: Fetching random quote from Supabase...")
+                    // Get a random quote directly from Supabase
+                    dailyQuote = try await getRandomQuote()
+                    print("🟢 Widget Timeline: Successfully fetched quote: '\(dailyQuote.quote.quoteText.prefix(50))...'")
+                    print("🟢 Widget Timeline: Quote author: \(dailyQuote.author.name)")
                 }
                 
                 let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote)
@@ -65,16 +73,51 @@ struct QuotedWidgetProvider: TimelineProvider {
                 
                 // Use .atEnd policy to allow manual refreshes via the Next button
                 let timeline = Timeline(entries: [entry], policy: .after(nextRefresh))
+                print("🟢 Widget Timeline: Timeline created successfully, calling completion")
                 completion(timeline)
                 
             } catch {
+                print("🔴 Widget Timeline: Error occurred: \(error)")
                 // Fallback to placeholder on error
                 let entry = placeholder(in: context)
                 let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(3600))) // Retry in 1 hour
+                print("🟢 Widget Timeline: Using fallback placeholder due to error")
                 completion(timeline)
             }
         }
     }
+    
+    private func getRandomQuote() async throws -> DailyQuote {
+        print("🟡 getRandomQuote: Starting Supabase query...")
+        
+        // Get a random quote with author and category directly from Supabase
+        let response: [DailyQuote] = try await supabase
+            .from("quotes")
+            .select("""
+                *,
+                authors!inner(*),
+                categories!inner(*)
+            """)
+            .order("random()")
+            .limit(1)
+            .execute()
+            .value
+        
+        print("🟡 getRandomQuote: Received \(response.count) quotes from Supabase")
+        
+        guard let randomQuote = response.first else {
+            print("🔴 getRandomQuote: No quotes found in response!")
+            throw QuoteServiceError.noQuotesFound
+        }
+        
+        print("🟡 getRandomQuote: Successfully got quote with ID: \(randomQuote.quote.id)")
+        return randomQuote
+    }
+}
+
+enum QuoteServiceError: Error {
+    case noQuotesFound
+    case networkError
 }
 
 // MARK: - Widget Entry
