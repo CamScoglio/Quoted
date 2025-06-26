@@ -50,7 +50,7 @@ class QuoteService: ObservableObject {
         // Generate a random offset
         let randomOffset = Int.random(in: 0..<totalCount)
         
-        // Get a quote with the random offset
+        // Get a quote with the random offset - use same structure as getTodaysQuote
         let response: [DailyQuote] = try await supabase
             .from("quotes")
             .select("""
