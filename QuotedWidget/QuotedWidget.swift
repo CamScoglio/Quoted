@@ -94,7 +94,24 @@ struct QuotedWidgetProvider: TimelineProvider {
     private func getRandomQuote() async throws -> DailyQuote {
         print("🟡 getRandomQuote: Starting Supabase query...")
         
-        // Get a random quote with author and category directly from Supabase
+        // First, get the total count of quotes
+        let countResponse = try await supabase
+            .from("quotes")
+            .select("id", head: true, count: .exact)
+            .execute()
+        
+        guard let totalCount = countResponse.count, totalCount > 0 else {
+            print("🔴 getRandomQuote: No quotes found in database!")
+            throw QuoteServiceError.noQuotesFound
+        }
+        
+        print("🟡 getRandomQuote: Found \(totalCount) total quotes")
+        
+        // Generate a random offset
+        let randomOffset = Int.random(in: 0..<totalCount)
+        print("🟡 getRandomQuote: Using random offset: \(randomOffset)")
+        
+        // Get a quote with the random offset
         let response: [DailyQuote] = try await supabase
             .from("quotes")
             .select("""
@@ -102,8 +119,7 @@ struct QuotedWidgetProvider: TimelineProvider {
                 authors!inner(*),
                 categories!inner(*)
             """)
-            .order("random()")
-            .limit(1)
+            .range(from: randomOffset, to: randomOffset)
             .execute()
             .value
         
@@ -114,7 +130,7 @@ struct QuotedWidgetProvider: TimelineProvider {
             throw QuoteServiceError.noQuotesFound
         }
         
-        print("🟡 getRandomQuote: Successfully got quote with ID: \(randomQuote.quote.id)")
+        print("🟡 getRandomQuote: Successfully got quote: \"\(randomQuote.quoteText.prefix(50))...\"")
         return randomQuote
     }
 }
@@ -132,78 +148,55 @@ struct QuotedWidgetSmallView: View {
     var body: some View {
         ZStack {
             // Background gradient
-            backgroundGradient
+            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
             
-            VStack(spacing: 8) {
+            VStack(spacing: WidgetStyles.Layout.Spacing.medium) {
                 // Next button
                 HStack {
                     Spacer()
                     Button(intent: NextQuoteIntent()) {
-                        HStack(spacing: 4) {
-                            Text("Next")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                            Image(systemName: "arrow.right")
-                                .font(.caption2)
+                        HStack(spacing: WidgetStyles.Layout.Spacing.small) {
+                            Text(WidgetStyles.Labels.nextButtonText)
+                                .font(WidgetStyles.Typography.Small.buttonFont)
+                                .fontWeight(WidgetStyles.Typography.Small.buttonFontWeight)
+                            Image(systemName: WidgetStyles.IconNames.nextArrow)
+                                .font(WidgetStyles.Typography.Icons.buttonIcon)
                         }
-                        .foregroundColor(.white.opacity(0.9))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
+                        .foregroundColor(WidgetStyles.Colors.buttonText)
+                        .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
+                        .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(.white.opacity(0.2))
+                            RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
+                                .fill(WidgetStyles.Colors.buttonBackground)
                         )
                     }
                 }
                 
                 // Quote icon
-                Image(systemName: "quote.bubble.fill")
-                    .font(.title2)
-                    .foregroundColor(.white.opacity(0.9))
+                Image(systemName: WidgetStyles.IconNames.quote)
+                    .font(WidgetStyles.Typography.Icons.smallQuoteIcon)
+                    .foregroundColor(WidgetStyles.Colors.buttonText)
                 
                 // Truncated quote text
-                Text(truncatedQuote)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
+                Text(WidgetStyles.truncatedQuote(entry.dailyQuote.quote.quoteText))
+                    .font(WidgetStyles.Typography.Small.quoteFont)
+                    .fontWeight(WidgetStyles.Typography.Small.quoteFontWeight)
+                    .foregroundColor(WidgetStyles.Colors.primaryText)
                     .multilineTextAlignment(.center)
-                    .lineLimit(3)
+                    .lineLimit(WidgetStyles.TextLimits.smallQuoteLineLimit)
                 
                 Spacer()
                 
                 // Author name
-                Text("— \(entry.dailyQuote.author.name)")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white.opacity(0.8))
-                    .lineLimit(1)
+                Text("\(WidgetStyles.Labels.authorPrefix)\(entry.dailyQuote.author.name)")
+                    .font(WidgetStyles.Typography.Small.authorFont)
+                    .fontWeight(WidgetStyles.Typography.Small.authorFontWeight)
+                    .foregroundColor(WidgetStyles.Colors.secondaryText)
+                    .lineLimit(WidgetStyles.TextLimits.authorLineLimit)
             }
-            .padding(12)
+            .padding(WidgetStyles.Layout.smallWidgetPadding)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-    
-    private var truncatedQuote: String {
-        let text = entry.dailyQuote.quote.quoteText
-        return text.count > 100 ? String(text.prefix(97)) + "..." : text
-    }
-    
-    private var backgroundGradient: some View {
-        LinearGradient(
-            colors: gradientColors,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-    
-    private var gradientColors: [Color] {
-        guard let gradient = entry.dailyQuote.quote.backgroundGradient,
-              let startHex = gradient["start"],
-              let endHex = gradient["end"] else {
-            return [Color.blue, Color.purple]
-        }
-        
-        return [Color(hex: startHex), Color(hex: endHex)]
+        .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
     }
 }
 
@@ -213,81 +206,63 @@ struct QuotedWidgetMediumView: View {
     var body: some View {
         ZStack {
             // Background gradient
-            backgroundGradient
+            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
             
-            HStack(spacing: 16) {
-                VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: WidgetStyles.Layout.Spacing.extraLarge) {
+                VStack(alignment: .leading, spacing: WidgetStyles.Layout.Spacing.large) {
                     // Next button
                     HStack {
                         Button(intent: NextQuoteIntent()) {
-                            HStack(spacing: 4) {
-                                Text("Next")
-                                    .font(.caption2)
-                                    .fontWeight(.semibold)
-                                Image(systemName: "arrow.right")
-                                    .font(.caption2)
+                            HStack(spacing: WidgetStyles.Layout.Spacing.small) {
+                                Text(WidgetStyles.Labels.nextButtonText)
+                                    .font(WidgetStyles.Typography.Medium.buttonFont)
+                                    .fontWeight(WidgetStyles.Typography.Medium.buttonFontWeight)
+                                Image(systemName: WidgetStyles.IconNames.nextArrow)
+                                    .font(WidgetStyles.Typography.Icons.buttonIcon)
                             }
-                            .foregroundColor(.white.opacity(0.9))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
+                            .foregroundColor(WidgetStyles.Colors.buttonText)
+                            .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
+                            .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
                             .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(.white.opacity(0.2))
+                                RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
+                                    .fill(WidgetStyles.Colors.buttonBackground)
                             )
                         }
                         
                         Spacer()
                         
-                        Image(systemName: "quote.bubble.fill")
-                            .font(.title3)
-                            .foregroundColor(.white.opacity(0.8))
+                        Image(systemName: WidgetStyles.IconNames.quote)
+                            .font(WidgetStyles.Typography.Icons.mediumQuoteIcon)
+                            .foregroundColor(WidgetStyles.Colors.secondaryText)
                     }
                     
                     // Quote text
                     Text(entry.dailyQuote.quote.quoteText)
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundColor(.white)
-                        .lineLimit(4)
+                        .font(WidgetStyles.Typography.Medium.quoteFont)
+                        .foregroundColor(WidgetStyles.Colors.primaryText)
+                        .lineLimit(WidgetStyles.TextLimits.mediumQuoteLineLimit)
                         .multilineTextAlignment(.leading)
                     
                     Spacer()
                     
                     // Author info
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("— \(entry.dailyQuote.author.name)")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                        Text("\(WidgetStyles.Labels.authorPrefix)\(entry.dailyQuote.author.name)")
+                            .font(WidgetStyles.Typography.Medium.authorFont)
+                            .fontWeight(WidgetStyles.Typography.Medium.authorFontWeight)
+                            .foregroundColor(WidgetStyles.Colors.primaryText)
                         
                         Text(entry.dailyQuote.author.profession)
-                            .font(.caption2)
-                            .foregroundColor(.white.opacity(0.7))
+                            .font(WidgetStyles.Typography.Medium.professionFont)
+                            .foregroundColor(WidgetStyles.Colors.tertiaryText)
                     }
                 }
-                .padding(16)
+                .padding(WidgetStyles.Layout.mediumWidgetPadding)
                 
                 Spacer()
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-    
-    private var backgroundGradient: some View {
-        LinearGradient(
-            colors: gradientColors,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-    
-    private var gradientColors: [Color] {
-        guard let gradient = entry.dailyQuote.quote.backgroundGradient,
-              let startHex = gradient["start"],
-              let endHex = gradient["end"] else {
-            return [Color.blue, Color.purple]
-        }
-        
-        return [Color(hex: startHex), Color(hex: endHex)]
+        .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
     }
 }
 
@@ -297,39 +272,39 @@ struct QuotedWidgetLargeView: View {
     var body: some View {
         ZStack {
             // Background gradient
-            backgroundGradient
+            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
             
-            VStack(spacing: 20) {
+            VStack(spacing: WidgetStyles.Layout.Spacing.huge) {
                 // Header
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("DAILY QUOTE")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white.opacity(0.8))
+                    VStack(alignment: .leading, spacing: WidgetStyles.Layout.Spacing.small) {
+                        Text(WidgetStyles.Labels.dailyQuoteHeader)
+                            .font(WidgetStyles.Typography.Large.headerFont)
+                            .fontWeight(WidgetStyles.Typography.Large.headerFontWeight)
+                            .foregroundColor(WidgetStyles.Colors.secondaryText)
                         
-                        Text(formattedDate)
-                            .font(.caption2)
-                            .foregroundColor(.white.opacity(0.6))
+                        Text(WidgetStyles.formatDate(entry.date))
+                            .font(WidgetStyles.Typography.Large.dateFont)
+                            .foregroundColor(WidgetStyles.Colors.quaternaryText)
                     }
                     
                     Spacer()
                     
                     // Next button
                     Button(intent: NextQuoteIntent()) {
-                        HStack(spacing: 6) {
-                            Text("Next")
-                                .font(.caption2)
-                                .fontWeight(.semibold)
-                            Image(systemName: "arrow.right")
-                                .font(.caption2)
+                        HStack(spacing: WidgetStyles.Layout.Spacing.small + 2) {
+                            Text(WidgetStyles.Labels.nextButtonText)
+                                .font(WidgetStyles.Typography.Large.buttonFont)
+                                .fontWeight(WidgetStyles.Typography.Large.buttonFontWeight)
+                            Image(systemName: WidgetStyles.IconNames.nextArrow)
+                                .font(WidgetStyles.Typography.Icons.buttonIcon)
                         }
-                        .foregroundColor(.white.opacity(0.9))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
+                        .foregroundColor(WidgetStyles.Colors.buttonText)
+                        .padding(.horizontal, WidgetStyles.Layout.Button.largeHorizontalPadding)
+                        .padding(.vertical, WidgetStyles.Layout.Button.largeVerticalPadding)
                         .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(.white.opacity(0.2))
+                            RoundedRectangle(cornerRadius: WidgetStyles.Layout.largeButtonCornerRadius)
+                                .fill(WidgetStyles.Colors.buttonBackground)
                         )
                     }
                 }
@@ -337,61 +312,37 @@ struct QuotedWidgetLargeView: View {
                 Spacer()
                 
                 // Quote content
-                VStack(spacing: 16) {
+                VStack(spacing: WidgetStyles.Layout.Spacing.extraLarge) {
                     // Quote mark
-                    Image(systemName: "quote.bubble.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.white.opacity(0.8))
+                    Image(systemName: WidgetStyles.IconNames.quote)
+                        .font(WidgetStyles.Typography.Icons.largeQuoteIcon)
+                        .foregroundColor(WidgetStyles.Colors.secondaryText)
                     
                     // Quote text
                     Text(entry.dailyQuote.quote.quoteText)
-                        .font(.system(size: 16, weight: .medium, design: .rounded))
-                        .foregroundColor(.white)
+                        .font(WidgetStyles.Typography.Large.quoteFont)
+                        .foregroundColor(WidgetStyles.Colors.primaryText)
                         .multilineTextAlignment(.center)
-                        .lineLimit(6)
-                        .lineSpacing(2)
+                        .lineLimit(WidgetStyles.TextLimits.largeQuoteLineLimit)
+                        .lineSpacing(WidgetStyles.TextLimits.quoteLineSpacing)
                 }
                 
                 Spacer()
                 
                 // Author section
-                VStack(spacing: 8) {
-                    Text("— \(entry.dailyQuote.author.name)")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.white)
+                VStack(spacing: WidgetStyles.Layout.Spacing.medium) {
+                    Text("\(WidgetStyles.Labels.authorPrefix)\(entry.dailyQuote.author.name)")
+                        .font(WidgetStyles.Typography.Large.authorFont)
+                        .foregroundColor(WidgetStyles.Colors.primaryText)
                     
                     Text(entry.dailyQuote.author.profession)
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.8))
+                        .font(WidgetStyles.Typography.Large.professionFont)
+                        .foregroundColor(WidgetStyles.Colors.secondaryText)
                 }
             }
-            .padding(20)
+            .padding(WidgetStyles.Layout.largeWidgetPadding)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-    
-    private var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d, yyyy"
-        return formatter.string(from: entry.date)
-    }
-    
-    private var backgroundGradient: some View {
-        LinearGradient(
-            colors: gradientColors,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-    
-    private var gradientColors: [Color] {
-        guard let gradient = entry.dailyQuote.quote.backgroundGradient,
-              let startHex = gradient["start"],
-              let endHex = gradient["end"] else {
-            return [Color.blue, Color.purple]
-        }
-        
-        return [Color(hex: startHex), Color(hex: endHex)]
+        .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
     }
 }
 

@@ -66,6 +66,7 @@
 				QuotedWidgetBundle.swift,
 				QuotedWidgetControl.swift,
 				QuotedWidgetLiveActivity.swift,
+				WidgetStyles.swift,
 			);
 			target = 21D570652E0CDDF200D3C33D /* QuotedWidgetExtension */;
 		};
