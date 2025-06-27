@@ -163,4 +163,209 @@ extension WidgetStyles {
         formatter.dateFormat = DateFormat.datePattern
         return formatter.string(from: date)
     }
-} 
+}
+
+// MARK: - SwiftUI Previews
+#if DEBUG
+import WidgetKit
+
+@available(iOS 14.0, *)
+struct WidgetStylesPreviews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            // Small Widget Preview
+            QuotedWidgetSmallView(entry: sampleEntry)
+                .previewContext(WidgetPreviewContext(family: .systemSmall))
+                .previewDisplayName("Small Widget")
+            
+            // Medium Widget Preview
+            QuotedWidgetMediumView(entry: sampleEntry)
+                .previewContext(WidgetPreviewContext(family: .systemMedium))
+                .previewDisplayName("Medium Widget")
+            
+            // Large Widget Preview
+            QuotedWidgetLargeView(entry: sampleEntry)
+                .previewContext(WidgetPreviewContext(family: .systemLarge))
+                .previewDisplayName("Large Widget")
+        }
+    }
+    
+    // Sample data for previews
+    static var sampleEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "The only way to do great work is to love what you do. Success comes to those who dare to begin and persist through challenges.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Steve Jobs",
+                    profession: "Entrepreneur & Innovator",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Motivation",
+                    icon: "star.fill",
+                    themeColor: "#667eea",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+}
+
+// MARK: - Style Testing Previews
+// These previews help you test different style configurations
+@available(iOS 14.0, *)
+struct StyleTestingPreviews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            // Test with different quote lengths
+            QuotedWidgetSmallView(entry: shortQuoteEntry)
+                .previewContext(WidgetPreviewContext(family: .systemSmall))
+                .previewDisplayName("Short Quote")
+            
+            QuotedWidgetSmallView(entry: longQuoteEntry)
+                .previewContext(WidgetPreviewContext(family: .systemSmall))
+                .previewDisplayName("Long Quote")
+            
+            // Test with different gradients
+            QuotedWidgetMediumView(entry: blueGradientEntry)
+                .previewContext(WidgetPreviewContext(family: .systemMedium))
+                .previewDisplayName("Blue Gradient")
+            
+            QuotedWidgetMediumView(entry: orangeGradientEntry)
+                .previewContext(WidgetPreviewContext(family: .systemMedium))
+                .previewDisplayName("Orange Gradient")
+        }
+    }
+    
+    static var shortQuoteEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "Be yourself.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#4facfe", "end": "#00f2fe"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Oscar Wilde",
+                    profession: "Writer",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Self",
+                    icon: "person.fill",
+                    themeColor: "#4facfe",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+    
+    static var longQuoteEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "The future belongs to those who believe in the beauty of their dreams and are willing to work tirelessly to make them a reality, no matter how many obstacles they face.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#fa709a", "end": "#fee140"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Eleanor Roosevelt",
+                    profession: "Former First Lady",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Dreams",
+                    icon: "star.fill",
+                    themeColor: "#fa709a",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+    
+    static var blueGradientEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "Innovation distinguishes between a leader and a follower.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#1e3c72", "end": "#2a5298"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Steve Jobs",
+                    profession: "CEO of Apple",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Innovation",
+                    icon: "lightbulb.fill",
+                    themeColor: "#1e3c72",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+    
+    static var orangeGradientEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#ff7e5f", "end": "#feb47b"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Winston Churchill",
+                    profession: "Prime Minister",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Success",
+                    icon: "trophy.fill",
+                    themeColor: "#ff7e5f",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+}
+#endif
