@@ -76,7 +76,7 @@ struct ContentView: View {
         
         do {
             // Try to get shared quote first for consistency
-            if let sharedQuote = quoteService.getCurrentSharedQuote() {
+            if let sharedQuote = await quoteService.getCurrentSharedQuote() {
                 currentQuote = sharedQuote
                 print("🔄 ContentView: Loaded shared quote for consistency")
             } else {

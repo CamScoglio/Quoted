@@ -65,15 +65,15 @@ struct QuotedWidgetProvider: TimelineProvider {
                     dailyQuote = placeholder(in: context).dailyQuote
                 } else {
                     // First, try to get the shared quote for consistency
-                    if let sharedQuote = sharedManager.getCurrentQuote(),
-                       !sharedManager.shouldFetchNewQuote() {
+                    if let sharedQuote = await sharedManager.getCurrentQuote(),
+                       !(await sharedManager.shouldFetchNewQuote()) {
                         print("🔄 Widget Timeline: Using shared quote for consistency")
                         dailyQuote = sharedQuote
                     } else {
                         print("🟢 Widget Timeline: Fetching new quote from Supabase...")
                         // Get a new quote and save it for consistency
                         dailyQuote = try await getRandomQuote()
-                        sharedManager.saveCurrentQuote(dailyQuote)
+                        await sharedManager.saveCurrentQuote(dailyQuote)
                         print("🟢 Widget Timeline: Successfully fetched and saved quote: '\(dailyQuote.quoteText.prefix(50))...'")
                         print("🟢 Widget Timeline: Quote author: \(dailyQuote.authors.name)")
                     }

@@ -100,6 +100,35 @@ struct Category: Codable, Identifiable {
     }
 }
 
+// MARK: - User Session Models
+struct UserSession: Codable {
+    let id: UUID
+    let deviceId: String
+    let currentQuoteId: UUID?
+    let lastUpdated: String?
+    let createdAt: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case deviceId = "device_id"
+        case currentQuoteId = "current_quote_id"
+        case lastUpdated = "last_updated"
+        case createdAt = "created_at"
+    }
+}
+
+struct UserSessionWithQuote: Codable {
+    let currentQuoteId: UUID?
+    let lastUpdated: String?
+    let quotes: DailyQuote?
+    
+    enum CodingKeys: String, CodingKey {
+        case currentQuoteId = "current_quote_id"
+        case lastUpdated = "last_updated"
+        case quotes
+    }
+}
+
 // MARK: - App Intents
 struct NextQuoteIntent: AppIntent {
     static var title: LocalizedStringResource { "Next Quote" }
@@ -111,7 +140,7 @@ struct NextQuoteIntent: AppIntent {
         print("🔵 NextQuoteIntent: About to clear shared quote and reload widget timeline...")
         
         // Clear the current shared quote so widget fetches a new one
-        SharedQuoteManager.shared.clearCurrentQuote()
+        await SharedQuoteManager.shared.clearCurrentQuote()
         
         // Reload all widgets of this kind to fetch a new random quote
         WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
