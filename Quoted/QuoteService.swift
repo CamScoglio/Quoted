@@ -45,8 +45,8 @@ class SharedQuoteManager {
             
             print("🔍 SharedQuoteManager: Update result count: \(updateResult.count ?? -1)")
             
-            // If no rows were updated, create a new session
-            if updateResult.count == 0 {
+            // If no rows were updated (count is 0 or nil), create a new session
+            if (updateResult.count ?? 0) == 0 {
                 print("🔍 SharedQuoteManager: No existing session found, creating new one")
                 let insertResult: [UserSession] = try await supabase
                     .from("user_sessions")
