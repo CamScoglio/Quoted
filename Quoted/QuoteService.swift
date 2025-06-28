@@ -31,6 +31,7 @@ class SharedQuoteManager {
     func saveCurrentQuote(_ quote: DailyQuote) async {
         do {
             let currentTime = ISO8601DateFormatter().string(from: Date())
+            print("🔍 SharedQuoteManager: Attempting to save quote \(quote.id.uuidString) for device \(deviceId)")
             
             // First, try to update existing session
             let updateResult = try await supabase
@@ -42,9 +43,12 @@ class SharedQuoteManager {
                 .eq("device_id", value: deviceId)
                 .execute()
             
+            print("🔍 SharedQuoteManager: Update result count: \(updateResult.count ?? -1)")
+            
             // If no rows were updated, create a new session
             if updateResult.count == 0 {
-                let _: [UserSession] = try await supabase
+                print("🔍 SharedQuoteManager: No existing session found, creating new one")
+                let insertResult: [UserSession] = try await supabase
                     .from("user_sessions")
                     .insert([
                         "device_id": deviceId,
@@ -52,11 +56,15 @@ class SharedQuoteManager {
                     ])
                     .execute()
                     .value
+                print("🔍 SharedQuoteManager: Insert result: \(insertResult.count) rows")
+            } else {
+                print("🔍 SharedQuoteManager: Updated existing session")
             }
             
-            print("📝 SharedQuoteManager: Saved quote to backend - \"\(quote.quoteText.prefix(50))...\"")
+            print("📝 SharedQuoteManager: Successfully saved quote to backend - \"\(quote.quoteText.prefix(50))...\"")
         } catch {
             print("❌ SharedQuoteManager: Failed to save quote to backend - \(error)")
+            print("❌ SharedQuoteManager: Error details: \(String(describing: error))")
             // Fallback to local storage
             saveCurrentQuoteLocally(quote)
         }
