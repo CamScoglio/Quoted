@@ -197,6 +197,9 @@ struct QuotedWidgetSmallView: View {
             .padding(WidgetStyles.Layout.smallWidgetPadding)
         }
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
+        .containerBackground(for: .widget) {
+            Color.clear
+        }
     }
 }
 
@@ -263,6 +266,9 @@ struct QuotedWidgetMediumView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
+        .containerBackground(for: .widget) {
+            Color.clear
+        }
     }
 }
 
@@ -343,6 +349,9 @@ struct QuotedWidgetLargeView: View {
             .padding(WidgetStyles.Layout.largeWidgetPadding)
         }
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
+        .containerBackground(for: .widget) {
+            Color.clear
+        }
     }
 }
 
