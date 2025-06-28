@@ -75,7 +75,14 @@ struct ContentView: View {
         errorMessage = nil
         
         do {
-            currentQuote = try await quoteService.getTodaysQuote()
+            // Try to get shared quote first for consistency
+            if let sharedQuote = quoteService.getCurrentSharedQuote() {
+                currentQuote = sharedQuote
+                print("🔄 ContentView: Loaded shared quote for consistency")
+            } else {
+                currentQuote = try await quoteService.getTodaysQuote()
+                print("🆕 ContentView: Loaded fresh today's quote")
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -89,7 +96,8 @@ struct ContentView: View {
             errorMessage = nil
             
             do {
-                currentQuote = try await quoteService.getRandomQuote()
+                currentQuote = try await quoteService.fetchNewQuote()
+                print("🎲 ContentView: Loaded new random quote")
             } catch {
                 errorMessage = error.localizedDescription
             }

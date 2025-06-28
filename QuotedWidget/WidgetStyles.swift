@@ -186,8 +186,8 @@ struct WidgetStyles {
 extension WidgetStyles {
     
     // Helper method to get gradient colors from quote data
-    static func gradientColors(from quote: Quote) -> [Color] {
-        guard let gradient = quote.backgroundGradient,
+    static func gradientColors(from dailyQuote: DailyQuote) -> [Color] {
+        guard let gradient = dailyQuote.backgroundGradient,
               let startHex = gradient["start"],
               let endHex = gradient["end"] else {
             return [Colors.fallbackGradientStart, Colors.fallbackGradientEnd]
@@ -197,9 +197,9 @@ extension WidgetStyles {
     }
     
     // Helper method to create background gradient
-    static func backgroundGradient(for quote: Quote) -> LinearGradient {
+    static func backgroundGradient(for dailyQuote: DailyQuote) -> LinearGradient {
         LinearGradient(
-            colors: gradientColors(from: quote),
+            colors: gradientColors(from: dailyQuote),
             startPoint: Gradient.startPoint,
             endPoint: Gradient.endPoint
         )
@@ -614,5 +614,7 @@ struct LiveStyleEditor: PreviewProvider {
  │ Move "Button(intent: NextQuoteIntent())" to different      │  ← Reposition the Next button
  │ location in the VStack/HStack structure                    │  
  └─────────────────────────────────────────────────────────────┘
+ 
+ */
 
 #endif

@@ -104,10 +104,14 @@ struct Category: Codable, Identifiable {
 struct NextQuoteIntent: AppIntent {
     static var title: LocalizedStringResource { "Next Quote" }
     static var description: IntentDescription { "Get the next random quote" }
+    static var openAppWhenRun: Bool = false
     
     func perform() async throws -> some IntentResult {
         print("🔵 NextQuoteIntent: Button was tapped!")
-        print("🔵 NextQuoteIntent: About to reload widget timeline...")
+        print("🔵 NextQuoteIntent: About to clear shared quote and reload widget timeline...")
+        
+        // Clear the current shared quote so widget fetches a new one
+        SharedQuoteManager.shared.clearCurrentQuote()
         
         // Reload all widgets of this kind to fetch a new random quote
         WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
