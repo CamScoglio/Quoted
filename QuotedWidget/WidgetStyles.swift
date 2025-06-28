@@ -387,4 +387,138 @@ struct LiveWidgetPreviews: PreviewProvider {
         )
     }
 }
+
+// MARK: - Live Style Editor Previews
+// Edit these values to see INSTANT changes in your widgets!
+@available(iOS 14.0, *)
+struct LiveStyleEditor: PreviewProvider {
+    static var previews: some View {
+        Group {
+            // 🎨 EDIT THESE VALUES TO SEE LIVE CHANGES! 🎨
+            
+            // Small Widget with Editable Styles
+            QuotedWidgetSmallView(entry: editableSmallEntry)
+                .previewContext(WidgetPreviewContext(family: .systemSmall))
+                .previewDisplayName("🎨 Small - Edit Me!")
+            
+            // Medium Widget with Editable Styles
+            QuotedWidgetMediumView(entry: editableMediumEntry)
+                .previewContext(WidgetPreviewContext(family: .systemMedium))
+                .previewDisplayName("🎨 Medium - Edit Me!")
+            
+            // Large Widget with Editable Styles
+            QuotedWidgetLargeView(entry: editableLargeEntry)
+                .previewContext(WidgetPreviewContext(family: .systemLarge))
+                .previewDisplayName("🎨 Large - Edit Me!")
+        }
+    }
+    
+    // 🔥 EDIT THESE SAMPLE ENTRIES TO TEST DIFFERENT STYLES! 🔥
+    
+    static var editableSmallEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                // 📝 EDIT THIS QUOTE TEXT:
+                quoteText: "Life is what happens when you're busy making other plans.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                // 🎨 EDIT THESE GRADIENT COLORS (hex format):
+                backgroundGradient: ["start": "#ff9a9e", "end": "#fecfef"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    // 📝 EDIT AUTHOR NAME:
+                    name: "John Lennon",
+                    // 📝 EDIT PROFESSION:
+                    profession: "Musician",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    // 📝 EDIT CATEGORY:
+                    name: "Life",
+                    icon: "heart.fill",
+                    themeColor: "#ff9a9e",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+    
+    static var editableMediumEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                // 📝 EDIT THIS QUOTE TEXT:
+                quoteText: "Innovation distinguishes between a leader and a follower. The key is to embrace change.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                // 🎨 EDIT THESE GRADIENT COLORS:
+                backgroundGradient: ["start": "#a8edea", "end": "#fed6e3"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    // 📝 EDIT AUTHOR NAME:
+                    name: "Steve Jobs",
+                    // 📝 EDIT PROFESSION:
+                    profession: "Visionary & CEO",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    // 📝 EDIT CATEGORY:
+                    name: "Innovation",
+                    icon: "lightbulb.fill",
+                    themeColor: "#a8edea",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+    
+    static var editableLargeEntry: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                // 📝 EDIT THIS QUOTE TEXT:
+                quoteText: "The only impossible journey is the one you never begin. Every expert was once a beginner, and every pro was once an amateur.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                // 🎨 EDIT THESE GRADIENT COLORS:
+                backgroundGradient: ["start": "#ffecd2", "end": "#fcb69f"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    // 📝 EDIT AUTHOR NAME:
+                    name: "Tony Robbins",
+                    // 📝 EDIT PROFESSION:
+                    profession: "Motivational Speaker",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    // 📝 EDIT CATEGORY:
+                    name: "Growth",
+                    icon: "arrow.up.circle.fill",
+                    themeColor: "#ffecd2",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+}
+
 #endif
