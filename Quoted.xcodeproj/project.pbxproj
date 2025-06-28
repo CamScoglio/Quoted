@@ -56,6 +56,7 @@
 				AppIntent.swift,
 				Assets.xcassets,
 				Info.plist,
+				QuotedWidgetBundle.swift,
 			);
 			target = 21D570532E0CDDA400D3C33D /* Quoted */;
 		};
