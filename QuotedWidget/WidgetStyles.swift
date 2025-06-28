@@ -614,6 +614,5 @@ struct LiveStyleEditor: PreviewProvider {
  │ Move "Button(intent: NextQuoteIntent())" to different      │  ← Reposition the Next button
  │ location in the VStack/HStack structure                    │  
  └─────────────────────────────────────────────────────────────┘
-*/
 
 #endif
