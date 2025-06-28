@@ -165,99 +165,148 @@ extension WidgetStyles {
     }
 }
 
-// MARK: - SwiftUI Previews
+// MARK: - Previews
 #if DEBUG
 import WidgetKit
 
+// Simple style testing previews that work independently
 @available(iOS 14.0, *)
 struct WidgetStylesPreviews: PreviewProvider {
     static var previews: some View {
         Group {
-            // Small Widget Preview
-            QuotedWidgetSmallView(entry: sampleEntry)
+            // Color Palette Preview
+            VStack(spacing: 12) {
+                Text("Widget Color Palette")
+                    .font(.headline)
+                    .padding()
+                
+                HStack {
+                    ColorSwatch(color: WidgetStyles.Colors.primaryText, name: "Primary")
+                    ColorSwatch(color: WidgetStyles.Colors.secondaryText, name: "Secondary")
+                    ColorSwatch(color: WidgetStyles.Colors.tertiaryText, name: "Tertiary")
+                }
+                
+                HStack {
+                    ColorSwatch(color: WidgetStyles.Colors.buttonBackground, name: "Button BG")
+                    ColorSwatch(color: WidgetStyles.Colors.buttonText, name: "Button Text")
+                }
+            }
+            .padding()
+            .previewDisplayName("Color Palette")
+            
+            // Typography Preview
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Typography Styles")
+                    .font(.headline)
+                    .padding(.bottom)
+                
+                Text("Small Widget Quote")
+                    .font(WidgetStyles.Typography.Small.quoteFont)
+                    .foregroundColor(WidgetStyles.Colors.primaryText)
+                
+                Text("Medium Widget Quote")
+                    .font(WidgetStyles.Typography.Medium.quoteFont)
+                    .foregroundColor(WidgetStyles.Colors.primaryText)
+                
+                Text("Large Widget Quote")
+                    .font(WidgetStyles.Typography.Large.quoteFont)
+                    .foregroundColor(WidgetStyles.Colors.primaryText)
+                
+                Text("— Author Name")
+                    .font(WidgetStyles.Typography.Small.authorFont)
+                    .foregroundColor(WidgetStyles.Colors.secondaryText)
+            }
+            .padding()
+            .previewDisplayName("Typography")
+            
+            // Gradient Preview
+            VStack(spacing: 12) {
+                Text("Gradient Styles")
+                    .font(.headline)
+                    .padding()
+                
+                RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius)
+                    .fill(LinearGradient(
+                        colors: [Color(hex: "#667eea"), Color(hex: "#764ba2")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(height: 60)
+                    .overlay(
+                        Text("Blue Purple")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                    )
+                
+                RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius)
+                    .fill(LinearGradient(
+                        colors: [Color(hex: "#4facfe"), Color(hex: "#00f2fe")],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+                    .frame(height: 60)
+                    .overlay(
+                        Text("Blue Cyan")
+                            .foregroundColor(.white)
+                            .font(.caption)
+                    )
+            }
+            .padding()
+            .previewDisplayName("Gradients")
+        }
+    }
+}
+
+// Helper view for color swatches
+struct ColorSwatch: View {
+    let color: Color
+    let name: String
+    
+    var body: some View {
+        VStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(color)
+                .frame(width: 50, height: 50)
+            Text(name)
+                .font(.caption2)
+                .multilineTextAlignment(.center)
+        }
+    }
+}
+
+// Live Widget Previews - These match the actual built widgets exactly
+@available(iOS 14.0, *)
+struct LiveWidgetPreviews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            // Small Widget - Exact match to built widget
+            QuotedWidgetSmallView(entry: sampleEntrySmall)
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
-                .previewDisplayName("Small Widget")
+                .previewDisplayName("Small Widget - Live")
             
-            // Medium Widget Preview
-            QuotedWidgetMediumView(entry: sampleEntry)
+            // Medium Widget - Exact match to built widget  
+            QuotedWidgetMediumView(entry: sampleEntryMedium)
                 .previewContext(WidgetPreviewContext(family: .systemMedium))
-                .previewDisplayName("Medium Widget")
+                .previewDisplayName("Medium Widget - Live")
             
-            // Large Widget Preview
-            QuotedWidgetLargeView(entry: sampleEntry)
+            // Large Widget - Exact match to built widget
+            QuotedWidgetLargeView(entry: sampleEntryLarge)
                 .previewContext(WidgetPreviewContext(family: .systemLarge))
-                .previewDisplayName("Large Widget")
+                .previewDisplayName("Large Widget - Live")
         }
     }
     
-    // Sample data for previews
-    static var sampleEntry: QuotedWidgetEntry {
+    // Sample data that you can edit to see live changes
+    static var sampleEntrySmall: QuotedWidgetEntry {
         QuotedWidgetEntry(
             date: Date(),
             dailyQuote: DailyQuote(
                 id: UUID(),
-                quoteText: "The only way to do great work is to love what you do. Success comes to those who dare to begin and persist through challenges.",
+                quoteText: "Be yourself; everyone else is already taken.",
                 authorId: UUID(),
                 categoryId: UUID(),
                 designTheme: "minimal",
                 backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
-                isFeatured: true,
-                createdAt: Date(),
-                authors: Author(
-                    id: UUID(),
-                    name: "Steve Jobs",
-                    profession: "Entrepreneur & Innovator",
-                    bio: nil,
-                    imageUrl: nil
-                ),
-                categories: Category(
-                    id: UUID(),
-                    name: "Motivation",
-                    icon: "star.fill",
-                    themeColor: "#667eea",
-                    createdAt: Date()
-                )
-            )
-        )
-    }
-}
-
-// MARK: - Style Testing Previews
-// These previews help you test different style configurations
-@available(iOS 14.0, *)
-struct StyleTestingPreviews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            // Test with different quote lengths
-            QuotedWidgetSmallView(entry: shortQuoteEntry)
-                .previewContext(WidgetPreviewContext(family: .systemSmall))
-                .previewDisplayName("Short Quote")
-            
-            QuotedWidgetSmallView(entry: longQuoteEntry)
-                .previewContext(WidgetPreviewContext(family: .systemSmall))
-                .previewDisplayName("Long Quote")
-            
-            // Test with different gradients
-            QuotedWidgetMediumView(entry: blueGradientEntry)
-                .previewContext(WidgetPreviewContext(family: .systemMedium))
-                .previewDisplayName("Blue Gradient")
-            
-            QuotedWidgetMediumView(entry: orangeGradientEntry)
-                .previewContext(WidgetPreviewContext(family: .systemMedium))
-                .previewDisplayName("Orange Gradient")
-        }
-    }
-    
-    static var shortQuoteEntry: QuotedWidgetEntry {
-        QuotedWidgetEntry(
-            date: Date(),
-            dailyQuote: DailyQuote(
-                id: UUID(),
-                quoteText: "Be yourself.",
-                authorId: UUID(),
-                categoryId: UUID(),
-                designTheme: "minimal",
-                backgroundGradient: ["start": "#4facfe", "end": "#00f2fe"],
                 isFeatured: true,
                 createdAt: Date(),
                 authors: Author(
@@ -271,6 +320,36 @@ struct StyleTestingPreviews: PreviewProvider {
                     id: UUID(),
                     name: "Self",
                     icon: "person.fill",
+                    themeColor: "#667eea",
+                    createdAt: Date()
+                )
+            )
+        )
+    }
+    
+    static var sampleEntryMedium: QuotedWidgetEntry {
+        QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "The only way to do great work is to love what you do. Success comes to those who dare to begin.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#4facfe", "end": "#00f2fe"],
+                isFeatured: true,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Steve Jobs",
+                    profession: "Entrepreneur & Innovator",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Motivation",
+                    icon: "star.fill",
                     themeColor: "#4facfe",
                     createdAt: Date()
                 )
@@ -278,12 +357,12 @@ struct StyleTestingPreviews: PreviewProvider {
         )
     }
     
-    static var longQuoteEntry: QuotedWidgetEntry {
+    static var sampleEntryLarge: QuotedWidgetEntry {
         QuotedWidgetEntry(
             date: Date(),
             dailyQuote: DailyQuote(
                 id: UUID(),
-                quoteText: "The future belongs to those who believe in the beauty of their dreams and are willing to work tirelessly to make them a reality, no matter how many obstacles they face.",
+                quoteText: "The future belongs to those who believe in the beauty of their dreams and are willing to work tirelessly to make them a reality.",
                 authorId: UUID(),
                 categoryId: UUID(),
                 designTheme: "minimal",
@@ -302,66 +381,6 @@ struct StyleTestingPreviews: PreviewProvider {
                     name: "Dreams",
                     icon: "star.fill",
                     themeColor: "#fa709a",
-                    createdAt: Date()
-                )
-            )
-        )
-    }
-    
-    static var blueGradientEntry: QuotedWidgetEntry {
-        QuotedWidgetEntry(
-            date: Date(),
-            dailyQuote: DailyQuote(
-                id: UUID(),
-                quoteText: "Innovation distinguishes between a leader and a follower.",
-                authorId: UUID(),
-                categoryId: UUID(),
-                designTheme: "minimal",
-                backgroundGradient: ["start": "#1e3c72", "end": "#2a5298"],
-                isFeatured: true,
-                createdAt: Date(),
-                authors: Author(
-                    id: UUID(),
-                    name: "Steve Jobs",
-                    profession: "CEO of Apple",
-                    bio: nil,
-                    imageUrl: nil
-                ),
-                categories: Category(
-                    id: UUID(),
-                    name: "Innovation",
-                    icon: "lightbulb.fill",
-                    themeColor: "#1e3c72",
-                    createdAt: Date()
-                )
-            )
-        )
-    }
-    
-    static var orangeGradientEntry: QuotedWidgetEntry {
-        QuotedWidgetEntry(
-            date: Date(),
-            dailyQuote: DailyQuote(
-                id: UUID(),
-                quoteText: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
-                authorId: UUID(),
-                categoryId: UUID(),
-                designTheme: "minimal",
-                backgroundGradient: ["start": "#ff7e5f", "end": "#feb47b"],
-                isFeatured: true,
-                createdAt: Date(),
-                authors: Author(
-                    id: UUID(),
-                    name: "Winston Churchill",
-                    profession: "Prime Minister",
-                    bio: nil,
-                    imageUrl: nil
-                ),
-                categories: Category(
-                    id: UUID(),
-                    name: "Success",
-                    icon: "trophy.fill",
-                    themeColor: "#ff7e5f",
                     createdAt: Date()
                 )
             )
