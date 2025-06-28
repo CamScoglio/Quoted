@@ -192,6 +192,9 @@ struct QuotedWidgetSmallView: View {
         }
         .padding(WidgetStyles.Layout.smallWidgetPadding)
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
+        .containerBackground(for: .widget) {
+            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
+        }
     }
 }
 
@@ -253,6 +256,9 @@ struct QuotedWidgetMediumView: View {
             Spacer()
         }
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
+        .containerBackground(for: .widget) {
+            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
+        }
     }
 }
 
@@ -328,6 +334,9 @@ struct QuotedWidgetLargeView: View {
         }
         .padding(WidgetStyles.Layout.largeWidgetPadding)
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
+        .containerBackground(for: .widget) {
+            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
+        }
     }
 }
 
@@ -357,10 +366,6 @@ struct QuotedWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: QuotedWidgetProvider()) { entry in
             QuotedWidgetEntryView(entry: entry)
-                .containerBackground(for: .widget) {
-                    // Use the same gradient as the widget content
-                    WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
-                }
         }
         .configurationDisplayName("Daily Quote")
         .description("Get inspired with a new quote every day.")
