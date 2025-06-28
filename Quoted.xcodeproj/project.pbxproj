@@ -80,7 +80,9 @@
 		21D570EA2E0CE7C400D3C33D /* Exceptions for "Quoted" folder in "QuotedWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				ContentView.swift,
 				Info.plist,
+				QuotedApp.swift,
 			);
 			target = 21D570652E0CDDF200D3C33D /* QuotedWidgetExtension */;
 		};
