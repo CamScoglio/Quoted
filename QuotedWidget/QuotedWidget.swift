@@ -146,11 +146,7 @@ struct QuotedWidgetSmallView: View {
     let entry: QuotedWidgetEntry
     
     var body: some View {
-        ZStack {
-            // Background gradient
-            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
-            
-            VStack(spacing: WidgetStyles.Layout.Spacing.medium) {
+        VStack(spacing: WidgetStyles.Layout.Spacing.medium) {
                 // Next button
                 HStack {
                     Spacer()
@@ -193,13 +189,9 @@ struct QuotedWidgetSmallView: View {
                     .fontWeight(WidgetStyles.Typography.Small.authorFontWeight)
                     .foregroundColor(WidgetStyles.Colors.secondaryText)
                     .lineLimit(WidgetStyles.TextLimits.authorLineLimit)
-            }
-            .padding(WidgetStyles.Layout.smallWidgetPadding)
         }
+        .padding(WidgetStyles.Layout.smallWidgetPadding)
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
-        .containerBackground(for: .widget) {
-            Color.clear
-        }
     }
 }
 
@@ -207,11 +199,7 @@ struct QuotedWidgetMediumView: View {
     let entry: QuotedWidgetEntry
     
     var body: some View {
-        ZStack {
-            // Background gradient
-            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
-            
-            HStack(spacing: WidgetStyles.Layout.Spacing.extraLarge) {
+        HStack(spacing: WidgetStyles.Layout.Spacing.extraLarge) {
                 VStack(alignment: .leading, spacing: WidgetStyles.Layout.Spacing.large) {
                     // Next button
                     HStack {
@@ -262,13 +250,9 @@ struct QuotedWidgetMediumView: View {
                 }
                 .padding(WidgetStyles.Layout.mediumWidgetPadding)
                 
-                Spacer()
-            }
+            Spacer()
         }
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
-        .containerBackground(for: .widget) {
-            Color.clear
-        }
     }
 }
 
@@ -276,11 +260,7 @@ struct QuotedWidgetLargeView: View {
     let entry: QuotedWidgetEntry
     
     var body: some View {
-        ZStack {
-            // Background gradient
-            WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
-            
-            VStack(spacing: WidgetStyles.Layout.Spacing.huge) {
+        VStack(spacing: WidgetStyles.Layout.Spacing.huge) {
                 // Header
                 HStack {
                     VStack(alignment: .leading, spacing: WidgetStyles.Layout.Spacing.small) {
@@ -345,13 +325,9 @@ struct QuotedWidgetLargeView: View {
                         .font(WidgetStyles.Typography.Large.professionFont)
                         .foregroundColor(WidgetStyles.Colors.secondaryText)
                 }
-            }
-            .padding(WidgetStyles.Layout.largeWidgetPadding)
         }
+        .padding(WidgetStyles.Layout.largeWidgetPadding)
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
-        .containerBackground(for: .widget) {
-            Color.clear
-        }
     }
 }
 
@@ -382,7 +358,8 @@ struct QuotedWidget: Widget {
         StaticConfiguration(kind: kind, provider: QuotedWidgetProvider()) { entry in
             QuotedWidgetEntryView(entry: entry)
                 .containerBackground(for: .widget) {
-                    Color.clear
+                    // Use the same gradient as the widget content
+                    WidgetStyles.backgroundGradient(for: entry.dailyQuote.quote)
                 }
         }
         .configurationDisplayName("Daily Quote")
