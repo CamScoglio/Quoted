@@ -1,4 +1,0 @@
-IDEAS FOR NEXT TIME CODING:
-
--Create backend qupote consistency in Supabase?
--this would create backend

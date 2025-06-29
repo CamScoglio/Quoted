@@ -1,9 +1,10 @@
 //
-//  SupabaseClient.swift
+//  SupabaseService.swift
 //  Quoted
 //
 //  Created by Cam Scoglio on 6/25/25.
 //
+
 import Foundation
 import Supabase
 
@@ -23,4 +24,4 @@ class SupabaseManager: ObservableObject {
         
         self.client = SupabaseClient(supabaseURL: url, supabaseKey: key)
     }
-}
+} 
