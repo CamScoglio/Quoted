@@ -86,6 +86,20 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		217502E12E10D533007BBB58 /* Exceptions for "Quoted" folder in "QuotedWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 21D570652E0CDDF200D3C33D /* QuotedWidgetExtension */;
+		};
+		217502E22E10D574007BBB58 /* Exceptions for "Quoted" folder in "Quoted" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 21D570532E0CDDA400D3C33D /* Quoted */;
+		};
 		21D570D32E0CE44700D3C33D /* Exceptions for "QuotedWidget" folder in "Quoted" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -97,6 +111,7 @@
 		21D570E12E0CE70700D3C33D /* Exceptions for "QuotedWidget" folder in "QuotedWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Intents/NextQuoteIntent.swift,
 				QuotedWidget.swift,
 				QuotedWidgetBundle.swift,
 				QuotedWidgetControl.swift,
@@ -110,6 +125,10 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		21D570562E0CDDA400D3C33D /* Quoted */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				217502E22E10D574007BBB58 /* Exceptions for "Quoted" folder in "Quoted" target */,
+				217502E12E10D533007BBB58 /* Exceptions for "Quoted" folder in "QuotedWidgetExtension" target */,
+			);
 			path = Quoted;
 			sourceTree = "<group>";
 		};
