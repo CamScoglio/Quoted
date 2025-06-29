@@ -86,7 +86,6 @@ class UserManager: ObservableObject {
             anonymousId: deviceId,
             displayName: nil,
             avatarUrl: nil,
-            subscriptionTier: .free,
             preferences: .default,
             createdAt: Date(),
             updatedAt: Date()
@@ -138,7 +137,6 @@ class UserManager: ObservableObject {
             anonymousId: currentUser.anonymousId,
             displayName: displayName ?? currentUser.displayName,
             avatarUrl: avatarUrl ?? currentUser.avatarUrl,
-            subscriptionTier: currentUser.subscriptionTier,
             preferences: currentUser.preferences,
             createdAt: currentUser.createdAt,
             updatedAt: Date()
@@ -159,7 +157,6 @@ class UserManager: ObservableObject {
             anonymousId: currentUser.anonymousId,
             displayName: currentUser.displayName,
             avatarUrl: currentUser.avatarUrl,
-            subscriptionTier: currentUser.subscriptionTier,
             preferences: preferences,
             createdAt: currentUser.createdAt,
             updatedAt: Date()
@@ -204,20 +201,20 @@ class UserManager: ObservableObject {
             throw UserManagerError.authenticationFailed
         }
         
-        let newUser = User(
-            id: userId,
-            email: nil, // Phone auth doesn't use email
+        let authUser = try await supabase.auth.session.user
+        let user = User(
+            id: authUser.id,
+            email: authUser.email,
             anonymousId: nil,
-            displayName: nil,
-            avatarUrl: nil,
-            subscriptionTier: .free,
+            displayName: authUser.userMetadata["display_name"] as? String,
+            avatarUrl: authUser.userMetadata["avatar_url"] as? String,
             preferences: .default,
-            createdAt: Date(),
-            updatedAt: Date()
+            createdAt: authUser.createdAt,
+            updatedAt: authUser.updatedAt ?? authUser.createdAt
         )
         
-        try await createUserProfile(user: newUser)
-        return newUser
+        try await createUserProfile(user: user)
+        return user
     }
     
     private func createUserProfile(user: User) async throws {

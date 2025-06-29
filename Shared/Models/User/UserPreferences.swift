@@ -1,13 +1,9 @@
 import Foundation
 
-// MARK: - User Preferences Model
+// MARK: - Simple User Preferences
 struct UserPreferences: Codable {
     let notificationTime: Date?
-    let preferredCategories: [String]
-    let favoriteAuthors: [String]
     let themePreference: ThemePreference
-    let readingStreak: ReadingStreak
-    let privacySettings: PrivacySettings
     
     enum ThemePreference: String, Codable, CaseIterable {
         case system = "system"
@@ -22,30 +18,6 @@ struct UserPreferences: Codable {
             }
         }
     }
-    
-    struct ReadingStreak: Codable {
-        let currentStreak: Int
-        let longestStreak: Int
-        let lastReadDate: Date?
-        
-        init() {
-            self.currentStreak = 0
-            self.longestStreak = 0
-            self.lastReadDate = nil
-        }
-    }
-    
-    struct PrivacySettings: Codable {
-        let shareReadingStats: Bool
-        let allowAnalytics: Bool
-        let emailNotifications: Bool
-        
-        init() {
-            self.shareReadingStats = false
-            self.allowAnalytics = true
-            self.emailNotifications = true
-        }
-    }
 }
 
 // MARK: - Default Preferences
@@ -53,11 +25,7 @@ extension UserPreferences {
     static var `default`: UserPreferences {
         return UserPreferences(
             notificationTime: nil,
-            preferredCategories: [],
-            favoriteAuthors: [],
-            themePreference: .system,
-            readingStreak: ReadingStreak(),
-            privacySettings: PrivacySettings()
+            themePreference: .system
         )
     }
 } 

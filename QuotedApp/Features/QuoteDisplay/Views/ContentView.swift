@@ -45,8 +45,6 @@ struct ContentView: View {
                             .foregroundColor(.white)
                     } else if let quote = currentQuote {
                         QuoteDisplayView(quote: quote)
-                            .environmentObject(userManager)
-                            .environmentObject(analyticsManager)
                     } else if let error = errorMessage {
                         VStack(spacing: 16) {
                             Image(systemName: "exclamationmark.triangle")
@@ -206,7 +204,6 @@ struct ShareButton: View {
 
 struct ProfileView: View {
     @EnvironmentObject var userManager: UserManager
-    @EnvironmentObject var analyticsManager: AnalyticsManager
     @Environment(\.dismiss) private var dismiss
     @State private var showingSignOut = false
     
@@ -220,7 +217,7 @@ struct ProfileView: View {
                 )
                 .ignoresSafeArea()
                 
-                VStack(spacing: 30) {
+                VStack(spacing: 40) {
                     // Profile Header
                     VStack(spacing: 16) {
                         Image(systemName: userManager.currentUser?.isAnonymous == true ? "person.circle.fill" : "person.crop.circle.fill")
@@ -234,55 +231,20 @@ struct ProfileView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(.white)
                                 
-                                Text("Sign in to sync your data across devices")
+                                Text("Sign in to sync your quote across devices")
                                     .font(.subheadline)
                                     .foregroundColor(.white.opacity(0.8))
                                     .multilineTextAlignment(.center)
                             } else {
-                                Text(user.displayName ?? "User")
+                                Text(user.displayName ?? user.phoneNumber ?? "User")
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundColor(.white)
                                 
-                                Text("Premium Member")
+                                Text("Signed In")
                                     .font(.subheadline)
                                     .foregroundColor(.white.opacity(0.8))
                             }
-                        }
-                    }
-                    
-                    // Reading Streak
-                    if let user = userManager.currentUser,
-                       let streak = user.preferences.readingStreak {
-                        VStack(spacing: 8) {
-                            Text("Reading Streak")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                            
-                            HStack(spacing: 20) {
-                                VStack {
-                                    Text("\(streak.currentStreak)")
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                    Text("Current")
-                                        .font(.caption)
-                                        .foregroundColor(.white.opacity(0.8))
-                                }
-                                
-                                VStack {
-                                    Text("\(streak.longestStreak)")
-                                        .font(.title)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                    Text("Best")
-                                        .font(.caption)
-                                        .foregroundColor(.white.opacity(0.8))
-                                }
-                            }
-                            .padding()
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(12)
                         }
                     }
                     
