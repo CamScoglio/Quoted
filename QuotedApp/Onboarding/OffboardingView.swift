@@ -3,3 +3,5 @@
 //"Click to get started"
 
 //Sent to ContentView
+import Foundation
+import SwiftUI

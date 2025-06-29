@@ -3,3 +3,5 @@
 //Onboarding starts
 
 //Send to EmailView
+import Foundation
+import SwiftUI
