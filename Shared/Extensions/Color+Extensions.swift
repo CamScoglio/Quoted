@@ -6,8 +6,10 @@
 //
 
 import SwiftUI
+import UIKit
 
 extension Color {
+    // MARK: - Hex Color Support
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
@@ -31,5 +33,15 @@ extension Color {
             blue:  Double(b) / 255,
             opacity: Double(a) / 255
         )
+    }
+    
+    // MARK: - Theme Colors
+    static let quotedPrimary = Color.blue
+    static let quotedSecondary = Color.purple
+    static let quotedAccent = Color.orange
+    
+    // MARK: - Gradient Helpers
+    static func gradientColors(from startHex: String, to endHex: String) -> [Color] {
+        return [Color(hex: startHex), Color(hex: endHex)]
     }
 } 

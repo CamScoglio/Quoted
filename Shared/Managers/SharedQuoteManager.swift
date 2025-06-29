@@ -9,7 +9,7 @@ import Foundation
 import Supabase
 
 // MARK: - Shared Quote Manager
-// Handles quote consistency between widget and main app using Supabase backend
+// Handles quote consistency between widget and main app using user-centric system
 class SharedQuoteManager {
     static let shared = SharedQuoteManager()
     
@@ -27,38 +27,54 @@ class SharedQuoteManager {
         print("🔧 SharedQuoteManager: Using device ID - \(deviceId)")
     }
     
-    // Save the current quote to Supabase backend
+    // Save the current quote to Supabase backend using new user_daily_quotes system
     func saveCurrentQuote(_ quote: DailyQuote) async {
         do {
             let currentTime = ISO8601DateFormatter().string(from: Date())
             print("🔍 SharedQuoteManager: Attempting to save quote \(quote.id.uuidString) for device \(deviceId)")
             
-            // First, try to update existing session
+            // Get current user ID if authenticated, otherwise use device ID
+            let userId = await UserManager.shared.currentUser?.id
+            
+            // First, try to update existing daily quote assignment
             let updateResult = try await supabase
-                .from("user_sessions")
+                .from("user_daily_quotes")
                 .update([
-                    "current_quote_id": quote.id.uuidString,
-                    "last_updated": currentTime
+                    "is_viewed": true,
+                    "viewed_at": currentTime
                 ])
-                .eq("device_id", value: deviceId)
+                .eq("quote_id", value: quote.id.uuidString)
+                .eq(userId != nil ? "user_id" : "device_id", value: userId?.uuidString ?? deviceId)
+                .eq("assigned_date", value: ISO8601DateFormatter().string(from: Calendar.current.startOfDay(for: Date())))
                 .execute()
             
             print("🔍 SharedQuoteManager: Update result count: \(updateResult.count ?? -1)")
             
-            // If no rows were updated (count is 0 or nil), create a new session
+            // If no rows were updated, create a new daily quote assignment
             if (updateResult.count ?? 0) == 0 {
-                print("🔍 SharedQuoteManager: No existing session found, creating new one")
-                let insertResult: [UserSession] = try await supabase
-                    .from("user_sessions")
-                    .insert([
-                        "device_id": deviceId,
-                        "current_quote_id": quote.id.uuidString
-                    ])
+                print("🔍 SharedQuoteManager: No existing assignment found, creating new one")
+                
+                var insertData: [String: Any] = [
+                    "quote_id": quote.id.uuidString,
+                    "assigned_date": ISO8601DateFormatter().string(from: Calendar.current.startOfDay(for: Date())),
+                    "is_viewed": true,
+                    "viewed_at": currentTime
+                ]
+                
+                if let userId = userId {
+                    insertData["user_id"] = userId.uuidString
+                } else {
+                    insertData["device_id"] = deviceId
+                }
+                
+                try await supabase
+                    .from("user_daily_quotes")
+                    .insert(insertData)
                     .execute()
-                    .value
-                print("🔍 SharedQuoteManager: Insert result: \(insertResult.count) rows")
+                
+                print("🔍 SharedQuoteManager: Created new daily quote assignment")
             } else {
-                print("🔍 SharedQuoteManager: Updated existing session")
+                print("🔍 SharedQuoteManager: Updated existing assignment")
             }
             
             print("📝 SharedQuoteManager: Successfully saved quote to backend - \"\(quote.quoteText.prefix(50))...\"")
@@ -70,26 +86,54 @@ class SharedQuoteManager {
         }
     }
     
-    // Get the current shared quote from Supabase
+    // Get the current shared quote from Supabase using new system
     func getCurrentQuote() async -> DailyQuote? {
         do {
-            // Get the user session for this device
-            let sessions: [UserSessionWithQuote] = try await supabase
-                .from("user_sessions")
+            let userId = await UserManager.shared.currentUser?.id
+            let today = ISO8601DateFormatter().string(from: Calendar.current.startOfDay(for: Date()))
+            
+            // Get today's assigned quote for this user/device
+            let response = try await supabase
+                .from("user_daily_quotes")
                 .select("""
-                    current_quote_id,
-                    last_updated,
-                    quotes!inner(*,
-                        authors!inner(*),
-                        categories!inner(*)
+                    quote_id,
+                    assigned_date,
+                    is_viewed,
+                    quotes!inner(
+                        id,
+                        quote_text,
+                        source,
+                        tags,
+                        background_gradient,
+                        authors!inner(
+                            id,
+                            name,
+                            bio,
+                            birth_year,
+                            death_year
+                        ),
+                        categories!inner(
+                            id,
+                            name,
+                            description,
+                            color_hex
+                        )
                     )
                 """)
-                .eq("device_id", value: deviceId)
+                .eq(userId != nil ? "user_id" : "device_id", value: userId?.uuidString ?? deviceId)
+                .eq("assigned_date", value: today)
                 .execute()
-                .value
             
-            if let session = sessions.first,
-               let quote = session.quotes {
+            // Parse the response manually since we're dealing with joined data
+            if let data = response.data,
+               let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+               let firstItem = jsonArray.first,
+               let quotesData = firstItem["quotes"] as? [String: Any] {
+                
+                // Convert the nested quote data back to DailyQuote
+                let quoteJson = try JSONSerialization.data(withJSONObject: quotesData)
+                let quote = try JSONDecoder().decode(DailyQuote.self, from: quoteJson)
+                
                 print("📖 SharedQuoteManager: Retrieved quote from backend - \"\(quote.quoteText.prefix(50))...\"")
                 
                 // Also save locally as cache
@@ -109,21 +153,27 @@ class SharedQuoteManager {
     // Check if we should fetch a new quote (optional: time-based refresh)
     func shouldFetchNewQuote(maxAge: TimeInterval = 3600) async -> Bool { // 1 hour default
         do {
-            let sessions: [UserSession] = try await supabase
-                .from("user_sessions")
-                .select("last_updated")
-                .eq("device_id", value: deviceId)
-                .execute()
-                .value
+            let userId = await UserManager.shared.currentUser?.id
+            let today = ISO8601DateFormatter().string(from: Calendar.current.startOfDay(for: Date()))
             
-            guard let session = sessions.first,
-                  let lastUpdateString = session.lastUpdated,
-                  let lastUpdate = ISO8601DateFormatter().date(from: lastUpdateString) else {
+            let response = try await supabase
+                .from("user_daily_quotes")
+                .select("assigned_date, viewed_at")
+                .eq(userId != nil ? "user_id" : "device_id", value: userId?.uuidString ?? deviceId)
+                .eq("assigned_date", value: today)
+                .execute()
+            
+            if let data = response.data,
+               let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+               let firstItem = jsonArray.first,
+               let viewedAtString = firstItem["viewed_at"] as? String,
+               let viewedAt = ISO8601DateFormatter().date(from: viewedAtString) {
+                
+                let timeSinceUpdate = Date().timeIntervalSince(viewedAt)
+                return timeSinceUpdate > maxAge
+            } else {
                 return true // No previous update, should fetch
             }
-            
-            let timeSinceUpdate = Date().timeIntervalSince(lastUpdate)
-            return timeSinceUpdate > maxAge
         } catch {
             print("❌ SharedQuoteManager: Failed to check update time - \(error)")
             return true // On error, fetch new quote
@@ -133,10 +183,14 @@ class SharedQuoteManager {
     // Clear the shared quote from backend and local storage
     func clearCurrentQuote() async {
         do {
+            let userId = await UserManager.shared.currentUser?.id
+            let today = ISO8601DateFormatter().string(from: Calendar.current.startOfDay(for: Date()))
+            
             try await supabase
-                .from("user_sessions")
+                .from("user_daily_quotes")
                 .delete()
-                .eq("device_id", value: deviceId)
+                .eq(userId != nil ? "user_id" : "device_id", value: userId?.uuidString ?? deviceId)
+                .eq("assigned_date", value: today)
                 .execute()
             
             print("🗑️ SharedQuoteManager: Cleared shared quote from backend")

@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-class QuoteService: ObservableObject {
+class QuoteRepository: ObservableObject {
     private let supabase = SupabaseManager.shared.client
     private let sharedManager = SharedQuoteManager.shared
     

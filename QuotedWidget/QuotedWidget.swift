@@ -14,7 +14,6 @@ import Supabase
 // MARK: - Widget Timeline Provider
 struct QuotedWidgetProvider: TimelineProvider {
     private let supabase = SupabaseManager.shared.client
-    private let sharedManager = SharedQuoteManager.shared
     
     func placeholder(in context: Context) -> QuotedWidgetEntry {
         QuotedWidgetEntry(
@@ -22,26 +21,20 @@ struct QuotedWidgetProvider: TimelineProvider {
             dailyQuote: DailyQuote(
                 id: UUID(),
                 quoteText: "The only way to do great work is to love what you do.",
-                authorId: UUID(),
-                categoryId: UUID(),
-                designTheme: "minimal",
-                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
-                isFeatured: true,
-                createdAt: Date(),
                 authors: Author(
                     id: UUID(),
                     name: "Steve Jobs",
-                    profession: "Entrepreneur",
                     bio: nil,
-                    imageUrl: nil
+                    birthYear: nil,
+                    deathYear: nil
                 ),
                 categories: Category(
                     id: UUID(),
                     name: "Motivation",
-                    icon: "lightbulb.fill",
-                    themeColor: "#667eea",
-                    createdAt: Date()
-                )
+                    description: nil
+                ),
+                dateAssigned: Date(),
+                backgroundGradient: ["start": "667eea", "end": "764ba2"]
             )
         )
     }
@@ -61,22 +54,12 @@ struct QuotedWidgetProvider: TimelineProvider {
                 
                 if context.isPreview {
                     print("🟢 Widget Timeline: Using placeholder for preview")
-                    // Use placeholder for preview
                     dailyQuote = placeholder(in: context).dailyQuote
                 } else {
-                    // First, try to get the shared quote for consistency
-                    if let sharedQuote = await sharedManager.getCurrentQuote(),
-                       !(await sharedManager.shouldFetchNewQuote()) {
-                        print("🔄 Widget Timeline: Using shared quote for consistency")
-                        dailyQuote = sharedQuote
-                    } else {
-                        print("🟢 Widget Timeline: Fetching new quote from Supabase...")
-                        // Get a new quote and save it for consistency
-                        dailyQuote = try await getRandomQuote()
-                        await sharedManager.saveCurrentQuote(dailyQuote)
-                        print("🟢 Widget Timeline: Successfully fetched and saved quote: '\(dailyQuote.quoteText.prefix(50))...'")
-                        print("🟢 Widget Timeline: Quote author: \(dailyQuote.authors.name)")
-                    }
+                    print("🟢 Widget Timeline: Fetching today's quote from Supabase...")
+                    dailyQuote = try await getTodaysQuote()
+                    print("🟢 Widget Timeline: Successfully fetched quote: '\(dailyQuote.quoteText.prefix(50))...'")
+                    print("🟢 Widget Timeline: Quote author: \(dailyQuote.authors.name)")
                 }
                 
                 let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote)
@@ -100,28 +83,65 @@ struct QuotedWidgetProvider: TimelineProvider {
         }
     }
     
-    private func getRandomQuote() async throws -> DailyQuote {
-        print("🟡 getRandomQuote: Starting Supabase query...")
+    private func getTodaysQuote() async throws -> DailyQuote {
+        print("🟡 getTodaysQuote: Starting Supabase query...")
         
-        // First, get the total count of quotes
+        // Get device ID for widget
+        let deviceId = getDeviceId()
+        let today = Calendar.current.startOfDay(for: Date())
+        
+        // First, check if there's already a quote assigned for today
+        let existingQuoteResponse: [UserDailyQuote] = try await supabase
+            .from("user_daily_quotes")
+            .select("""
+                *,
+                quotes!inner(
+                    *,
+                    authors!inner(*),
+                    categories!inner(*)
+                )
+            """)
+            .eq("device_id", value: deviceId)
+            .gte("assigned_date", value: today.ISO8601Format())
+            .lt("assigned_date", value: Calendar.current.date(byAdding: .day, value: 1, to: today)!.ISO8601Format())
+            .execute()
+            .value
+        
+        if let existingAssignment = existingQuoteResponse.first,
+           let quoteData = existingAssignment.quotes {
+            print("🟡 getTodaysQuote: Found existing quote for today")
+            return DailyQuote(
+                id: quoteData.id,
+                quoteText: quoteData.quoteText,
+                authors: quoteData.authors,
+                categories: quoteData.categories,
+                dateAssigned: existingAssignment.assignedDate,
+                backgroundGradient: quoteData.backgroundGradient
+            )
+        }
+        
+        // No existing quote, get a random one and assign it
+        print("🟡 getTodaysQuote: No existing quote, fetching new one...")
+        
+        // Get total count of quotes
         let countResponse = try await supabase
             .from("quotes")
             .select("id", head: true, count: .exact)
             .execute()
         
         guard let totalCount = countResponse.count, totalCount > 0 else {
-            print("🔴 getRandomQuote: No quotes found in database!")
+            print("🔴 getTodaysQuote: No quotes found in database!")
             throw QuoteServiceError.noQuotesFound
         }
         
-        print("🟡 getRandomQuote: Found \(totalCount) total quotes")
+        print("🟡 getTodaysQuote: Found \(totalCount) total quotes")
         
         // Generate a random offset
         let randomOffset = Int.random(in: 0..<totalCount)
-        print("🟡 getRandomQuote: Using random offset: \(randomOffset)")
+        print("🟡 getTodaysQuote: Using random offset: \(randomOffset)")
         
         // Get a quote with the random offset
-        let response: [DailyQuote] = try await supabase
+        let response: [Quote] = try await supabase
             .from("quotes")
             .select("""
                 *,
@@ -132,15 +152,49 @@ struct QuotedWidgetProvider: TimelineProvider {
             .execute()
             .value
         
-        print("🟡 getRandomQuote: Received \(response.count) quotes from Supabase")
-        
         guard let randomQuote = response.first else {
-            print("🔴 getRandomQuote: No quotes found in response!")
+            print("🔴 getTodaysQuote: No quotes found in response!")
             throw QuoteServiceError.noQuotesFound
         }
         
-        print("🟡 getRandomQuote: Successfully got quote: \"\(randomQuote.quoteText.prefix(50))...\"")
-        return randomQuote
+        // Assign this quote to the device for today
+        let assignment = UserDailyQuote(
+            id: UUID(),
+            userId: nil, // Widget uses device-based assignment
+            deviceId: deviceId,
+            quoteId: randomQuote.id,
+            assignedDate: today,
+            isViewed: true, // Mark as viewed since widget is showing it
+            viewedAt: Date()
+        )
+        
+        try await supabase
+            .from("user_daily_quotes")
+            .insert(assignment)
+            .execute()
+        
+        print("🟡 getTodaysQuote: Successfully assigned quote to device")
+        
+        return DailyQuote(
+            id: randomQuote.id,
+            quoteText: randomQuote.quoteText,
+            authors: randomQuote.authors,
+            categories: randomQuote.categories,
+            dateAssigned: today,
+            backgroundGradient: randomQuote.backgroundGradient
+        )
+    }
+    
+    private func getDeviceId() -> String {
+        let deviceIdKey = "QuotedWidgetDeviceId"
+        
+        if let existingDeviceId = UserDefaults.standard.string(forKey: deviceIdKey) {
+            return existingDeviceId
+        }
+        
+        let newDeviceId = UUID().uuidString
+        UserDefaults.standard.set(newDeviceId, forKey: deviceIdKey)
+        return newDeviceId
     }
 }
 
@@ -394,26 +448,20 @@ struct QuotedWidget_Previews: PreviewProvider {
             dailyQuote: DailyQuote(
                 id: UUID(),
                 quoteText: "The only way to do great work is to love what you do.",
-                authorId: UUID(),
-                categoryId: UUID(),
-                designTheme: "minimal",
-                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
-                isFeatured: true,
-                createdAt: Date(),
                 authors: Author(
                     id: UUID(),
                     name: "Steve Jobs",
-                    profession: "Entrepreneur",
                     bio: nil,
-                    imageUrl: nil
+                    birthYear: nil,
+                    deathYear: nil
                 ),
                 categories: Category(
                     id: UUID(),
                     name: "Motivation",
-                    icon: "lightbulb.fill",
-                    themeColor: "#667eea",
-                    createdAt: Date()
-                )
+                    description: nil
+                ),
+                dateAssigned: Date(),
+                backgroundGradient: ["start": "667eea", "end": "764ba2"]
             )
         )
         
