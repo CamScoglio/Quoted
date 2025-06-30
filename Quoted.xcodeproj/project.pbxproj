@@ -28,6 +28,10 @@
 		217502B42E10CC43007BBB58 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502952E10CC43007BBB58 /* Color+Extensions.swift */; };
 		217502BF2E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
 		217502C02E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
+		2198750C2E122088003DB662 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 219875092E122025003DB662 /* Config.plist */; };
+		2198750D2E122088003DB662 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 219875092E122025003DB662 /* Config.plist */; };
+		2198750F2E1220C8003DB662 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2198750E2E1220C8003DB662 /* Assets.xcassets */; };
+		219875102E1220C8003DB662 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2198750E2E1220C8003DB662 /* Assets.xcassets */; };
 		21CAB2252E12135E008E5EB8 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2242E12135E008E5EB8 /* AppView.swift */; };
 		21CAB2282E12138A008E5EB8 /* TwilioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2272E12138A008E5EB8 /* TwilioManager.swift */; };
 		21CAB2292E12138A008E5EB8 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2262E12138A008E5EB8 /* StorageManager.swift */; };
@@ -39,8 +43,6 @@
 		21CAB2372E1213A8008E5EB8 /* AvatarImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB22D2E1213A8008E5EB8 /* AvatarImage.swift */; };
 		21CAB2382E1213A8008E5EB8 /* OffboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2312E1213A8008E5EB8 /* OffboardingView.swift */; };
 		21CAB2392E1213A8008E5EB8 /* EmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB22E2E1213A8008E5EB8 /* EmailView.swift */; };
-		21CAB23F2E121464008E5EB8 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 21CAB23E2E121464008E5EB8 /* Config.plist */; };
-		21CAB2402E121464008E5EB8 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 21CAB23E2E121464008E5EB8 /* Config.plist */; };
 		21D570692E0CDDF200D3C33D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21D570682E0CDDF200D3C33D /* WidgetKit.framework */; };
 		21D5706B2E0CDDF200D3C33D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21D5706A2E0CDDF200D3C33D /* SwiftUI.framework */; };
 		21D5707C2E0CDDF300D3C33D /* QuotedWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 21D570662E0CDDF200D3C33D /* QuotedWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -86,6 +88,9 @@
 		2175029F2E10CC43007BBB58 /* QuoteRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteRepository.swift; sourceTree = "<group>"; };
 		217502A02E10CC43007BBB58 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		217502BE2E10D06C007BBB58 /* Notes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
+		219875092E122025003DB662 /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Config.plist; sourceTree = "<group>"; };
+		2198750E2E1220C8003DB662 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		219875112E1220DB003DB662 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		21CAB2242E12135E008E5EB8 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
 		21CAB2262E12138A008E5EB8 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
 		21CAB2272E12138A008E5EB8 /* TwilioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilioManager.swift; sourceTree = "<group>"; };
@@ -96,7 +101,7 @@
 		21CAB2302E1213A8008E5EB8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		21CAB2312E1213A8008E5EB8 /* OffboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffboardingView.swift; sourceTree = "<group>"; };
 		21CAB2322E1213A8008E5EB8 /* StartingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartingView.swift; sourceTree = "<group>"; };
-		21CAB23E2E121464008E5EB8 /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
+		21CAB2A62E121C88008E5EB8 /* Quoted.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Quoted.xcodeproj; sourceTree = "<group>"; };
 		21D570542E0CDDA400D3C33D /* Quoted.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quoted.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21D570662E0CDDF200D3C33D /* QuotedWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuotedWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		21D570682E0CDDF200D3C33D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -104,20 +109,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		217502E12E10D533007BBB58 /* Exceptions for "Quoted" folder in "QuotedWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 21D570652E0CDDF200D3C33D /* QuotedWidgetExtension */;
-		};
-		217502E22E10D574007BBB58 /* Exceptions for "Quoted" folder in "Quoted" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 21D570532E0CDDA400D3C33D /* Quoted */;
-		};
 		21D570D32E0CE44700D3C33D /* Exceptions for "QuotedWidget" folder in "Quoted" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -141,15 +132,6 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		21D570562E0CDDA400D3C33D /* Quoted */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				217502E22E10D574007BBB58 /* Exceptions for "Quoted" folder in "Quoted" target */,
-				217502E12E10D533007BBB58 /* Exceptions for "Quoted" folder in "QuotedWidgetExtension" target */,
-			);
-			path = Quoted;
-			sourceTree = "<group>";
-		};
 		21D570CC2E0CE44700D3C33D /* QuotedWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -292,15 +274,23 @@
 			path = Onboarding;
 			sourceTree = "<group>";
 		};
+		21CAB2A72E121C88008E5EB8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		21D5704B2E0CDDA400D3C33D = {
 			isa = PBXGroup;
 			children = (
-				21CAB23E2E121464008E5EB8 /* Config.plist */,
+				2198750E2E1220C8003DB662 /* Assets.xcassets */,
+				219875112E1220DB003DB662 /* Info.plist */,
+				219875092E122025003DB662 /* Config.plist */,
 				217502BE2E10D06C007BBB58 /* Notes.swift */,
 				217502A22E10CC43007BBB58 /* Shared */,
 				217502252E10C955007BBB58 /* QuotedApp */,
 				21D570CC2E0CE44700D3C33D /* QuotedWidget */,
-				21D570562E0CDDA400D3C33D /* Quoted */,
 				21D570672E0CDDF200D3C33D /* Frameworks */,
 				21D570552E0CDDA400D3C33D /* Products */,
 			);
@@ -342,7 +332,6 @@
 				21D5707B2E0CDDF300D3C33D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				21D570562E0CDDA400D3C33D /* Quoted */,
 				21D570CC2E0CE44700D3C33D /* QuotedWidget */,
 			);
 			name = Quoted;
@@ -364,9 +353,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				21D570562E0CDDA400D3C33D /* Quoted */,
 			);
 			name = QuotedWidgetExtension;
 			packageProductDependencies = (
@@ -410,6 +396,12 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 21D570552E0CDDA400D3C33D /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 21CAB2A72E121C88008E5EB8 /* Products */;
+					ProjectRef = 21CAB2A62E121C88008E5EB8 /* Quoted.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				21D570532E0CDDA400D3C33D /* Quoted */,
@@ -423,7 +415,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21CAB23F2E121464008E5EB8 /* Config.plist in Resources */,
+				2198750F2E1220C8003DB662 /* Assets.xcassets in Resources */,
+				2198750C2E122088003DB662 /* Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,7 +424,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				21CAB2402E121464008E5EB8 /* Config.plist in Resources */,
+				219875102E1220C8003DB662 /* Assets.xcassets in Resources */,
+				2198750D2E122088003DB662 /* Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -623,7 +617,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Quoted/Info.plist;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -651,7 +645,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Quoted/Info.plist;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
