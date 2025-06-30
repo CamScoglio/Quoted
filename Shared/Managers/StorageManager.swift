@@ -12,6 +12,9 @@ import UIKit
 @MainActor
 class StorageManager: ObservableObject {
     
+    // MARK: - Supabase Client
+    private let supabase = SupabaseManager.shared.client
+    
     // MARK: - Constants
     private let bucketName = "profile-images"
     private let imageQuality: CGFloat = 0.8

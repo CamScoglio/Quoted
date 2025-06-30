@@ -9,7 +9,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>io.supabase.user-management</string>
+				<string>io.supabase.quoted</string>
 			</array>
 		</dict>
 	</array>
