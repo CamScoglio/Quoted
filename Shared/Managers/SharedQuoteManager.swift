@@ -27,124 +27,33 @@ class SharedQuoteManager {
         print("🔧 SharedQuoteManager: Using device ID - \(deviceId)")
     }
     
-    // Save the current quote to Supabase backend
+    // Save the current quote (TEMPORARY: Local storage only during transition)
     func saveCurrentQuote(_ quote: DailyQuote) async {
-        do {
-            let currentTime = ISO8601DateFormatter().string(from: Date())
-            print("🔍 SharedQuoteManager: Attempting to save quote \(quote.id.uuidString) for device \(deviceId)")
-            
-            // First, try to update existing session
-            let updateResult = try await supabase
-                .from("user_sessions")
-                .update([
-                    "current_quote_id": quote.id.uuidString,
-                    "last_updated": currentTime
-                ])
-                .eq("device_id", value: deviceId)
-                .execute()
-            
-            print("🔍 SharedQuoteManager: Update result count: \(updateResult.count ?? -1)")
-            
-            // If no rows were updated (count is 0 or nil), create a new session
-            if (updateResult.count ?? 0) == 0 {
-                print("🔍 SharedQuoteManager: No existing session found, creating new one")
-                let insertResult: [UserSession] = try await supabase
-                    .from("user_sessions")
-                    .insert([
-                        "device_id": deviceId,
-                        "current_quote_id": quote.id.uuidString
-                    ])
-                    .execute()
-                    .value
-                print("🔍 SharedQuoteManager: Insert result: \(insertResult.count) rows")
-            } else {
-                print("🔍 SharedQuoteManager: Updated existing session")
-            }
-            
-            print("📝 SharedQuoteManager: Successfully saved quote to backend - \"\(quote.quoteText.prefix(50))...\"")
-        } catch {
-            print("❌ SharedQuoteManager: Failed to save quote to backend - \(error)")
-            print("❌ SharedQuoteManager: Error details: \(String(describing: error))")
-            // Fallback to local storage
-            saveCurrentQuoteLocally(quote)
-        }
+        print("⚠️ SharedQuoteManager: Using local storage during transition to user-based system")
+        saveCurrentQuoteLocally(quote)
     }
     
-    // Get the current shared quote from Supabase
+    // Get the current shared quote (TEMPORARY: Local storage only during transition)
     func getCurrentQuote() async -> DailyQuote? {
-        do {
-            // Get the user session for this device
-            let sessions: [UserSessionWithQuote] = try await supabase
-                .from("user_sessions")
-                .select("""
-                    current_quote_id,
-                    last_updated,
-                    quotes!inner(*,
-                        authors!inner(*),
-                        categories!inner(*)
-                    )
-                """)
-                .eq("device_id", value: deviceId)
-                .execute()
-                .value
-            
-            if let session = sessions.first,
-               let quote = session.quotes {
-                print("📖 SharedQuoteManager: Retrieved quote from backend - \"\(quote.quoteText.prefix(50))...\"")
-                
-                // Also save locally as cache
-                saveCurrentQuoteLocally(quote)
-                return quote
-            } else {
-                print("📖 SharedQuoteManager: No shared quote found in backend")
-                return getCurrentQuoteLocally()
-            }
-        } catch {
-            print("❌ SharedQuoteManager: Failed to get quote from backend - \(error)")
-            // Fallback to local storage
-            return getCurrentQuoteLocally()
-        }
+        print("⚠️ SharedQuoteManager: Using local storage during transition to user-based system")
+        return getCurrentQuoteLocally()
     }
     
-    // Check if we should fetch a new quote (optional: time-based refresh)
+    // Check if we should fetch a new quote (TEMPORARY: Check local storage during transition)
     func shouldFetchNewQuote(maxAge: TimeInterval = 3600) async -> Bool { // 1 hour default
-        do {
-            let sessions: [UserSession] = try await supabase
-                .from("user_sessions")
-                .select("last_updated")
-                .eq("device_id", value: deviceId)
-                .execute()
-                .value
-            
-            guard let session = sessions.first,
-                  let lastUpdateString = session.lastUpdated,
-                  let lastUpdate = ISO8601DateFormatter().date(from: lastUpdateString) else {
-                return true // No previous update, should fetch
-            }
-            
-            let timeSinceUpdate = Date().timeIntervalSince(lastUpdate)
-            return timeSinceUpdate > maxAge
-        } catch {
-            print("❌ SharedQuoteManager: Failed to check update time - \(error)")
-            return true // On error, fetch new quote
-        }
-    }
-    
-    // Clear the shared quote from backend and local storage
-    func clearCurrentQuote() async {
-        do {
-            try await supabase
-                .from("user_sessions")
-                .delete()
-                .eq("device_id", value: deviceId)
-                .execute()
-            
-            print("🗑️ SharedQuoteManager: Cleared shared quote from backend")
-        } catch {
-            print("❌ SharedQuoteManager: Failed to clear quote from backend - \(error)")
+        print("⚠️ SharedQuoteManager: Using local storage during transition to user-based system")
+        
+        guard let lastUpdate = UserDefaults.standard.object(forKey: "last_quote_update_local") as? Date else {
+            return true // No previous update, should fetch
         }
         
-        // Also clear local cache
+        let timeSinceUpdate = Date().timeIntervalSince(lastUpdate)
+        return timeSinceUpdate > maxAge
+    }
+    
+    // Clear the shared quote (TEMPORARY: Local storage only during transition)
+    func clearCurrentQuote() async {
+        print("⚠️ SharedQuoteManager: Using local storage during transition to user-based system")
         clearCurrentQuoteLocally()
     }
     
@@ -181,4 +90,4 @@ class SharedQuoteManager {
         UserDefaults.standard.removeObject(forKey: "last_quote_update_local")
         print("🗑️ SharedQuoteManager: Cleared local quote cache")
     }
-} 
+}

@@ -13,7 +13,6 @@
 		217502A32E10CC43007BBB58 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029A2E10CC43007BBB58 /* Category.swift */; };
 		217502A42E10CC43007BBB58 /* QuoteRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029F2E10CC43007BBB58 /* QuoteRepository.swift */; };
 		217502A52E10CC43007BBB58 /* DailyQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029B2E10CC43007BBB58 /* DailyQuote.swift */; };
-		217502A62E10CC43007BBB58 /* UserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029D2E10CC43007BBB58 /* UserSession.swift */; };
 		217502A72E10CC43007BBB58 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029C2E10CC43007BBB58 /* Quote.swift */; };
 		217502A82E10CC43007BBB58 /* Author.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502992E10CC43007BBB58 /* Author.swift */; };
 		217502A92E10CC43007BBB58 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502A02E10CC43007BBB58 /* SupabaseService.swift */; };
@@ -22,16 +21,26 @@
 		217502AC2E10CC43007BBB58 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029A2E10CC43007BBB58 /* Category.swift */; };
 		217502AD2E10CC43007BBB58 /* QuoteRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029F2E10CC43007BBB58 /* QuoteRepository.swift */; };
 		217502AE2E10CC43007BBB58 /* DailyQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029B2E10CC43007BBB58 /* DailyQuote.swift */; };
-		217502AF2E10CC43007BBB58 /* UserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029D2E10CC43007BBB58 /* UserSession.swift */; };
 		217502B02E10CC43007BBB58 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029C2E10CC43007BBB58 /* Quote.swift */; };
 		217502B12E10CC43007BBB58 /* Author.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502992E10CC43007BBB58 /* Author.swift */; };
 		217502B22E10CC43007BBB58 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502A02E10CC43007BBB58 /* SupabaseService.swift */; };
 		217502B32E10CC43007BBB58 /* SharedQuoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502972E10CC43007BBB58 /* SharedQuoteManager.swift */; };
 		217502B42E10CC43007BBB58 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502952E10CC43007BBB58 /* Color+Extensions.swift */; };
-		217502BC2E10CF74007BBB58 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 217502BB2E10CF74007BBB58 /* Config.plist */; };
-		217502BD2E10CF74007BBB58 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 217502BB2E10CF74007BBB58 /* Config.plist */; };
 		217502BF2E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
 		217502C02E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
+		21CAB2252E12135E008E5EB8 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2242E12135E008E5EB8 /* AppView.swift */; };
+		21CAB2282E12138A008E5EB8 /* TwilioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2272E12138A008E5EB8 /* TwilioManager.swift */; };
+		21CAB2292E12138A008E5EB8 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2262E12138A008E5EB8 /* StorageManager.swift */; };
+		21CAB22A2E12138A008E5EB8 /* TwilioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2272E12138A008E5EB8 /* TwilioManager.swift */; };
+		21CAB22B2E12138A008E5EB8 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2262E12138A008E5EB8 /* StorageManager.swift */; };
+		21CAB2342E1213A8008E5EB8 /* EnterPhoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB22F2E1213A8008E5EB8 /* EnterPhoneView.swift */; };
+		21CAB2352E1213A8008E5EB8 /* AuthPhoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB22C2E1213A8008E5EB8 /* AuthPhoneView.swift */; };
+		21CAB2362E1213A8008E5EB8 /* StartingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2322E1213A8008E5EB8 /* StartingView.swift */; };
+		21CAB2372E1213A8008E5EB8 /* AvatarImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB22D2E1213A8008E5EB8 /* AvatarImage.swift */; };
+		21CAB2382E1213A8008E5EB8 /* OffboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2312E1213A8008E5EB8 /* OffboardingView.swift */; };
+		21CAB2392E1213A8008E5EB8 /* EmailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB22E2E1213A8008E5EB8 /* EmailView.swift */; };
+		21CAB23F2E121464008E5EB8 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 21CAB23E2E121464008E5EB8 /* Config.plist */; };
+		21CAB2402E121464008E5EB8 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 21CAB23E2E121464008E5EB8 /* Config.plist */; };
 		21D570692E0CDDF200D3C33D /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21D570682E0CDDF200D3C33D /* WidgetKit.framework */; };
 		21D5706B2E0CDDF200D3C33D /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21D5706A2E0CDDF200D3C33D /* SwiftUI.framework */; };
 		21D5707C2E0CDDF300D3C33D /* QuotedWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 21D570662E0CDDF200D3C33D /* QuotedWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -74,11 +83,20 @@
 		2175029A2E10CC43007BBB58 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		2175029B2E10CC43007BBB58 /* DailyQuote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuote.swift; sourceTree = "<group>"; };
 		2175029C2E10CC43007BBB58 /* Quote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
-		2175029D2E10CC43007BBB58 /* UserSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSession.swift; sourceTree = "<group>"; };
 		2175029F2E10CC43007BBB58 /* QuoteRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteRepository.swift; sourceTree = "<group>"; };
 		217502A02E10CC43007BBB58 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
-		217502BB2E10CF74007BBB58 /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
 		217502BE2E10D06C007BBB58 /* Notes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
+		21CAB2242E12135E008E5EB8 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
+		21CAB2262E12138A008E5EB8 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
+		21CAB2272E12138A008E5EB8 /* TwilioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilioManager.swift; sourceTree = "<group>"; };
+		21CAB22C2E1213A8008E5EB8 /* AuthPhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthPhoneView.swift; sourceTree = "<group>"; };
+		21CAB22D2E1213A8008E5EB8 /* AvatarImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarImage.swift; sourceTree = "<group>"; };
+		21CAB22E2E1213A8008E5EB8 /* EmailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailView.swift; sourceTree = "<group>"; };
+		21CAB22F2E1213A8008E5EB8 /* EnterPhoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnterPhoneView.swift; sourceTree = "<group>"; };
+		21CAB2302E1213A8008E5EB8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		21CAB2312E1213A8008E5EB8 /* OffboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OffboardingView.swift; sourceTree = "<group>"; };
+		21CAB2322E1213A8008E5EB8 /* StartingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartingView.swift; sourceTree = "<group>"; };
+		21CAB23E2E121464008E5EB8 /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
 		21D570542E0CDDA400D3C33D /* Quoted.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quoted.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		21D570662E0CDDF200D3C33D /* QuotedWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuotedWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		21D570682E0CDDF200D3C33D /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -169,6 +187,7 @@
 		2175021F2E10C955007BBB58 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				21CAB2242E12135E008E5EB8 /* AppView.swift */,
 				2175021E2E10C955007BBB58 /* QuotedApp.swift */,
 			);
 			path = App;
@@ -202,19 +221,13 @@
 		217502252E10C955007BBB58 /* QuotedApp */ = {
 			isa = PBXGroup;
 			children = (
+				21CAB2332E1213A8008E5EB8 /* Onboarding */,
 				2175021F2E10C955007BBB58 /* App */,
 				217502242E10C955007BBB58 /* Features */,
 			);
 			path = QuotedApp;
 			sourceTree = "<group>";
 			usesTabs = 0;
-		};
-		217502272E10C955007BBB58 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Resources;
-			sourceTree = "<group>";
 		};
 		217502962E10CC43007BBB58 /* Extensions */ = {
 			isa = PBXGroup;
@@ -227,6 +240,8 @@
 		217502982E10CC43007BBB58 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				21CAB2262E12138A008E5EB8 /* StorageManager.swift */,
+				21CAB2272E12138A008E5EB8 /* TwilioManager.swift */,
 				217502972E10CC43007BBB58 /* SharedQuoteManager.swift */,
 			);
 			path = Managers;
@@ -239,7 +254,6 @@
 				2175029A2E10CC43007BBB58 /* Category.swift */,
 				2175029B2E10CC43007BBB58 /* DailyQuote.swift */,
 				2175029C2E10CC43007BBB58 /* Quote.swift */,
-				2175029D2E10CC43007BBB58 /* UserSession.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -264,14 +278,27 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		21CAB2332E1213A8008E5EB8 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				21CAB22C2E1213A8008E5EB8 /* AuthPhoneView.swift */,
+				21CAB22D2E1213A8008E5EB8 /* AvatarImage.swift */,
+				21CAB22E2E1213A8008E5EB8 /* EmailView.swift */,
+				21CAB22F2E1213A8008E5EB8 /* EnterPhoneView.swift */,
+				21CAB2302E1213A8008E5EB8 /* Info.plist */,
+				21CAB2312E1213A8008E5EB8 /* OffboardingView.swift */,
+				21CAB2322E1213A8008E5EB8 /* StartingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		21D5704B2E0CDDA400D3C33D = {
 			isa = PBXGroup;
 			children = (
+				21CAB23E2E121464008E5EB8 /* Config.plist */,
 				217502BE2E10D06C007BBB58 /* Notes.swift */,
-				217502BB2E10CF74007BBB58 /* Config.plist */,
 				217502A22E10CC43007BBB58 /* Shared */,
 				217502252E10C955007BBB58 /* QuotedApp */,
-				217502272E10C955007BBB58 /* Resources */,
 				21D570CC2E0CE44700D3C33D /* QuotedWidget */,
 				21D570562E0CDDA400D3C33D /* Quoted */,
 				21D570672E0CDDF200D3C33D /* Frameworks */,
@@ -396,7 +423,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				217502BC2E10CF74007BBB58 /* Config.plist in Resources */,
+				21CAB23F2E121464008E5EB8 /* Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,7 +431,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				217502BD2E10CF74007BBB58 /* Config.plist in Resources */,
+				21CAB2402E121464008E5EB8 /* Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -415,11 +442,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21CAB2342E1213A8008E5EB8 /* EnterPhoneView.swift in Sources */,
+				21CAB2352E1213A8008E5EB8 /* AuthPhoneView.swift in Sources */,
+				21CAB2362E1213A8008E5EB8 /* StartingView.swift in Sources */,
+				21CAB2372E1213A8008E5EB8 /* AvatarImage.swift in Sources */,
+				21CAB2382E1213A8008E5EB8 /* OffboardingView.swift in Sources */,
+				21CAB2392E1213A8008E5EB8 /* EmailView.swift in Sources */,
 				217502432E10C956007BBB58 /* QuoteDisplayView.swift in Sources */,
 				217502A32E10CC43007BBB58 /* Category.swift in Sources */,
 				217502A42E10CC43007BBB58 /* QuoteRepository.swift in Sources */,
 				217502A52E10CC43007BBB58 /* DailyQuote.swift in Sources */,
-				217502A62E10CC43007BBB58 /* UserSession.swift in Sources */,
+				21CAB22A2E12138A008E5EB8 /* TwilioManager.swift in Sources */,
+				21CAB22B2E12138A008E5EB8 /* StorageManager.swift in Sources */,
+				21CAB2252E12135E008E5EB8 /* AppView.swift in Sources */,
 				217502A72E10CC43007BBB58 /* Quote.swift in Sources */,
 				217502A82E10CC43007BBB58 /* Author.swift in Sources */,
 				217502A92E10CC43007BBB58 /* SupabaseService.swift in Sources */,
@@ -435,10 +470,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				21CAB2282E12138A008E5EB8 /* TwilioManager.swift in Sources */,
+				21CAB2292E12138A008E5EB8 /* StorageManager.swift in Sources */,
 				217502AC2E10CC43007BBB58 /* Category.swift in Sources */,
 				217502AD2E10CC43007BBB58 /* QuoteRepository.swift in Sources */,
 				217502AE2E10CC43007BBB58 /* DailyQuote.swift in Sources */,
-				217502AF2E10CC43007BBB58 /* UserSession.swift in Sources */,
 				217502C02E10D06F007BBB58 /* Notes.swift in Sources */,
 				217502B02E10CC43007BBB58 /* Quote.swift in Sources */,
 				217502B12E10CC43007BBB58 /* Author.swift in Sources */,
@@ -588,9 +624,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quoted/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -616,9 +652,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quoted/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
