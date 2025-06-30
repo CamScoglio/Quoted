@@ -45,6 +45,7 @@ struct StartingView: View {
                 
                 // Continue button at bottom
                 Button("Continue") {
+                    print("🔵 [StartingView] Continue button tapped")
                     navigateToEmail = true
                 }
                 .buttonStyle(.borderedProminent)
@@ -54,6 +55,14 @@ struct StartingView: View {
             }
             .navigationDestination(isPresented: $navigateToEmail) {
                 EmailView()
+            }
+            .onAppear {
+                print("🔵 [StartingView] View appeared - Onboarding started")
+            }
+            .onChange(of: navigateToEmail) { _, newValue in
+                if newValue {
+                    print("🔵 [StartingView] Navigating to EmailView")
+                }
             }
         }
     }

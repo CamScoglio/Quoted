@@ -50,6 +50,7 @@ struct OffboardingView: View {
                 // Get started button
                 VStack(spacing: 16) {
                     Button(action: {
+                        print("🟢 [OffboardingView] Get Started button tapped")
                         navigateToMainApp = true
                     }) {
                         HStack {
@@ -76,6 +77,16 @@ struct OffboardingView: View {
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToMainApp) {
                 ContentView()
+            }
+            .onAppear {
+                print("🟢 [OffboardingView] View appeared - Onboarding completed successfully!")
+                print("🟢 [OffboardingView] User has finished the entire onboarding flow")
+            }
+            .onChange(of: navigateToMainApp) { _, newValue in
+                if newValue {
+                    print("🟢 [OffboardingView] Navigating to main app (ContentView)")
+                    print("🟢 [OffboardingView] 🎉 ONBOARDING FLOW COMPLETE! 🎉")
+                }
             }
         }
     }

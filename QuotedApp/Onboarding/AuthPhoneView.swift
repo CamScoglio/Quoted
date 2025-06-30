@@ -12,8 +12,10 @@ import Supabase
 
 struct AuthPhoneView: View {
     let phoneNumber: String
+    let email: String
     @State private var verificationCode = ""
     @State private var isLoading = false
+    @State private var isResending = false
     @State private var navigateToOffboarding = false
     @State private var showingAlert = false
     @State private var alertMessage = ""
@@ -25,6 +27,7 @@ struct AuthPhoneView: View {
                 // Top section with back button
                 HStack {
                     Button(action: {
+                        print("🔴 [AuthPhoneView] Back button tapped")
                         dismiss()
                     }) {
                         Image(systemName: "arrow.left")
@@ -80,7 +83,9 @@ struct AuthPhoneView: View {
                             .onChange(of: verificationCode) { _, newValue in
                                 // Limit to 6 digits
                                 let filtered = newValue.filter { $0.isNumber }
-                                verificationCode = String(filtered.prefix(6))
+                                let limited = String(filtered.prefix(6))
+                                print("🔴 [AuthPhoneView] Code input changed: '\(newValue)' -> filtered: '\(limited)'")
+                                verificationCode = limited
                             }
                     }
                     .padding(.horizontal, 32)
@@ -91,7 +96,11 @@ struct AuthPhoneView: View {
                 
                 // Bottom buttons
                 VStack(spacing: 16) {
-                    Button(action: verifyCode) {
+                    Button(action: {
+                        print("🔴 [AuthPhoneView] Verify Code button tapped")
+                        print("🔴 [AuthPhoneView] Current code: '\(verificationCode)' (length: \(verificationCode.count))")
+                        verifyCode()
+                    }) {
                         HStack {
                             if isLoading {
                                 ProgressView()
@@ -109,12 +118,13 @@ struct AuthPhoneView: View {
                     }
                     .disabled(verificationCode.count != 6 || isLoading)
                     
-                    Button("Didn't receive code? Try again") {
-                        // Navigate back to resend
-                        dismiss()
+                    Button(isResending ? "Sending..." : "Didn't receive code? Resend") {
+                        print("🔴 [AuthPhoneView] Resend code button tapped")
+                        resendVerificationCode()
                     }
                     .font(.subheadline)
-                    .foregroundColor(.blue)
+                    .foregroundColor(isResending ? .gray : .blue)
+                    .disabled(isResending)
                 }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 50)
@@ -123,39 +133,101 @@ struct AuthPhoneView: View {
             .navigationDestination(isPresented: $navigateToOffboarding) {
                 OffboardingView()
             }
+            .onAppear {
+                print("🔴 [AuthPhoneView] View appeared for phone: \(phoneNumber)")
+            }
+            .onChange(of: navigateToOffboarding) { _, newValue in
+                if newValue {
+                    print("🔴 [AuthPhoneView] Navigating to OffboardingView")
+                }
+            }
+            .onChange(of: isLoading) { _, newValue in
+                print("🔴 [AuthPhoneView] Loading state changed: \(newValue)")
+            }
             .alert("Verification", isPresented: $showingAlert) {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(alertMessage)
+            }
+            .onChange(of: showingAlert) { _, newValue in
+                if newValue {
+                    print("🔴 [AuthPhoneView] Alert shown: '\(alertMessage)'")
+                }
             }
         }
     }
     
     private func verifyCode() {
         Task {
+            print("🔴 [AuthPhoneView] Starting code verification process...")
             isLoading = true
             
             // Convert formatted phone number to E.164 format
             let cleanNumber = phoneNumber.filter { $0.isNumber }
             let e164Number = "+1\(cleanNumber)"
             
-            // Use TwilioManager to verify code
-            let success = await TwilioManager.shared.verifyCode(verificationCode, for: e164Number)
+            NSLog("🔴 [AuthPhoneView] Formatted phone: '\(phoneNumber)'")
+            NSLog("🔴 [AuthPhoneView] Clean number: '\(cleanNumber)' (length: \(cleanNumber.count))")
+            NSLog("🔴 [AuthPhoneView] E.164 format: '\(e164Number)'")
+            print("🔴 [AuthPhoneView] Verification code: '\(verificationCode)'")
+            
+            // Use Supabase phone authentication instead of separate Twilio calls
+            print("🔴 [AuthPhoneView] Calling SupabaseManager.verifyPhoneOTP...")
+            let success = await SupabaseManager.shared.verifyPhoneOTP(e164Number, code: verificationCode, email: email)
+            
+            print("🔴 [AuthPhoneView] SupabaseManager.verifyPhoneOTP result: \(success)")
             
             if success {
-                print("✅ Code verified successfully!")
+                print("🔴 ✅ [AuthPhoneView] Phone verification and authentication successful!")
                 navigateToOffboarding = true
             } else {
+                print("🔴 ❌ [AuthPhoneView] Phone verification failed")
                 alertMessage = "Invalid verification code. Please try again."
                 showingAlert = true
                 verificationCode = "" // Clear the code for retry
+                print("🔴 [AuthPhoneView] Code cleared for retry")
             }
             
             isLoading = false
+            print("🔴 [AuthPhoneView] Code verification process completed")
+        }
+    }
+    
+    private func resendVerificationCode() {
+        Task {
+            print("🔴 [AuthPhoneView] Starting code resend process...")
+            isResending = true
+            
+            // Convert formatted phone number to E.164 format
+            let cleanNumber = phoneNumber.filter { $0.isNumber }
+            let e164Number = "+1\(cleanNumber)"
+            
+            NSLog("🔴 [AuthPhoneView] Resending to phone: '\(phoneNumber)'")
+            NSLog("🔴 [AuthPhoneView] E.164 format: '\(e164Number)'")
+            
+            // Use SupabaseManager to resend OTP instead of TwilioManager
+            print("🔴 [AuthPhoneView] Calling SupabaseManager.sendPhoneOTP...")
+            let success = await SupabaseManager.shared.sendPhoneOTP(e164Number)
+            
+            print("🔴 [AuthPhoneView] SupabaseManager.sendPhoneOTP result: \(success)")
+            
+            if success {
+                print("🔴 ✅ [AuthPhoneView] Verification code resent successfully!")
+                alertMessage = "Verification code sent! Please check your messages."
+                showingAlert = true
+                verificationCode = "" // Clear any existing code
+            } else {
+                print("🔴 ❌ [AuthPhoneView] Failed to resend verification code")
+                alertMessage = "Failed to resend verification code. Please try again."
+                showingAlert = true
+            }
+            
+            isResending = false
+            print("🔴 [AuthPhoneView] Code resend process completed")
         }
     }
 }
 
 #Preview {
-    AuthPhoneView(phoneNumber: "(555) 123-4567")
+    AuthPhoneView(phoneNumber: "(555) 123-4567", email: "test@example.com")
 }

@@ -64,6 +64,22 @@ struct ContentView: View {
             }
             .navigationTitle("Quoted")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Sign Out") {
+                        Task {
+                            print("🔴 [ContentView] Sign out button tapped")
+                            let success = await SupabaseManager.shared.signOut()
+                            if success {
+                                print("🔴 ✅ [ContentView] Sign out successful")
+                            } else {
+                                print("🔴 ❌ [ContentView] Sign out failed")
+                            }
+                        }
+                    }
+                    .foregroundColor(.white)
+                }
+            }
         }
         .task {
             await loadTodaysQuote()
