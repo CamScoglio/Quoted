@@ -8,7 +8,7 @@
 import AppIntents
 import WidgetKit
 
-struct NextQuoteIntent: AppIntent {
+struct NextQuoteIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "Next Quote"
     static var description = IntentDescription("Get a new random quote for the user")
     
@@ -40,4 +40,4 @@ struct NextQuoteIntent: AppIntent {
             return .result(dialog: "Failed to get new quote. Please try again.")
         }
     }
-} 
+}

@@ -8,6 +8,7 @@
 import WidgetKit
 import SwiftUI
 
+@main
 struct QuotedWidgetBundle: WidgetBundle {
     var body: some Widget {
         QuotedWidget()
