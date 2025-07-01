@@ -60,8 +60,8 @@ struct QuotedWidgetProvider: TimelineProvider {
                 return
             }
             
-            // Check authentication by actually trying to get current user
-            guard let currentUser = await supabase.getCurrentUser() else {
+            // Check authentication using shared state
+            guard supabase.isUserAuthenticated() else {
                 print("🔴 [Widget] User not authenticated - showing sign-in prompt")
                 let entry = createUnauthenticatedEntry()
                 let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
@@ -69,7 +69,7 @@ struct QuotedWidgetProvider: TimelineProvider {
                 return
             }
             
-            print("🟢 [Widget] User authenticated: \(currentUser.id)")
+            print("🟢 [Widget] User authenticated")
             
             do {
                 // Get user's daily quote, creating one if needed

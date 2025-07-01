@@ -25,6 +25,12 @@ class SupabaseManager: ObservableObject {
     
     let client: SupabaseClient
     
+    // App Group for sharing data between app and widget
+    private let appGroup = "group.com.Scoglio.Quoted"
+    private var sharedUserDefaults: UserDefaults? {
+        UserDefaults(suiteName: appGroup)
+    }
+    
     private init() {
         guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
               let config = NSDictionary(contentsOfFile: path),
@@ -77,6 +83,9 @@ class SupabaseManager: ObservableObject {
             print("🟢 ✅ [SupabaseManager] Phone verification successful!")
             print("🟢 [SupabaseManager] User ID: \(response.user.id)")
             print("🟢 [SupabaseManager] Session created: \(response.session != nil)")
+            
+            // Save authentication state for widget access
+            saveSharedAuthState(userId: response.user.id.uuidString)
             
             // Update user profile with email data
             let profileSuccess = await updateUserProfile(
@@ -151,6 +160,7 @@ class SupabaseManager: ObservableObject {
     func signOut() async -> Bool {
         do {
             try await client.auth.signOut()
+            clearSharedAuthState()
             print("🟢 ✅ [SupabaseManager] User signed out successfully")
             return true
         } catch {
@@ -162,6 +172,32 @@ class SupabaseManager: ObservableObject {
     /// Check if user is currently authenticated
     var isAuthenticated: Bool {
         return client.auth.currentUser != nil
+    }
+    
+    // MARK: - Shared Authentication State (for Widget)
+    
+    /// Save authentication state to shared UserDefaults for widget access
+    private func saveSharedAuthState(userId: String) {
+        sharedUserDefaults?.set(true, forKey: "isAuthenticated")
+        sharedUserDefaults?.set(userId, forKey: "currentUserId")
+        print("🟢 [SupabaseManager] Saved shared auth state for user: \(userId)")
+    }
+    
+    /// Clear authentication state from shared UserDefaults
+    private func clearSharedAuthState() {
+        sharedUserDefaults?.removeObject(forKey: "isAuthenticated")
+        sharedUserDefaults?.removeObject(forKey: "currentUserId")
+        print("🟢 [SupabaseManager] Cleared shared auth state")
+    }
+    
+    /// Check if user is authenticated (for widget use)
+    func isUserAuthenticated() -> Bool {
+        return sharedUserDefaults?.bool(forKey: "isAuthenticated") ?? false
+    }
+    
+    /// Get current user ID from shared state (for widget use)
+    func getSharedUserId() -> String? {
+        return sharedUserDefaults?.string(forKey: "currentUserId")
     }
     
     // MARK: - User Daily Quote Management (ONLY 2 FUNCTIONS)

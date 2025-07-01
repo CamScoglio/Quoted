@@ -15,14 +15,14 @@ struct NextQuoteIntent: WidgetConfigurationIntent {
     private let supabase = SupabaseManager.shared
     
     func perform() async throws -> some IntentResult {
-        // Check authentication by trying to get current user
-        guard let currentUser = await supabase.getCurrentUser() else {
+        // Check authentication using shared state
+        guard SupabaseManager.shared.isUserAuthenticated() else {
             print("🔴 [NextQuoteIntent] User not authenticated")
             WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
             return .result(dialog: "Please sign in to the app to get your daily quotes")
         }
         
-        print("🟢 [NextQuoteIntent] User authenticated: \(currentUser.id)")
+        print("🟢 [NextQuoteIntent] User authenticated")
         
         do {
             // Assign a new quote to the authenticated user
