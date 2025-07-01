@@ -1,33 +1,43 @@
 //
 //  NextQuoteIntent.swift
-//  QuotedWidget
+//  QuotedWidgetExtension
 //
 //  Created by Cam Scoglio on 6/25/25.
 //
 
-import Foundation
-import WidgetKit
 import AppIntents
+import WidgetKit
 
-// MARK: - App Intents
 struct NextQuoteIntent: AppIntent {
-    static var title: LocalizedStringResource { "Next Quote" }
-    static var description: IntentDescription { "Get the next random quote" }
-    static var openAppWhenRun: Bool = false
+    static var title: LocalizedStringResource = "Next Quote"
+    static var description = IntentDescription("Get a new random quote for the user")
+    
+    private let supabase = SupabaseManager.shared
     
     func perform() async throws -> some IntentResult {
-        print("🔵 NextQuoteIntent: Button was tapped!")
-        print("🔵 NextQuoteIntent: About to clear shared quote and reload widget timeline...")
+        // Check authentication by trying to get current user
+        guard let currentUser = await supabase.getCurrentUser() else {
+            print("🔴 [NextQuoteIntent] User not authenticated")
+            WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+            return .result(dialog: "Please sign in to the app to get your daily quotes")
+        }
         
-        // Clear the current shared quote so widget fetches a new one
-        await SharedQuoteManager.shared.clearCurrentQuote()
+        print("🟢 [NextQuoteIntent] User authenticated: \(currentUser.id)")
         
-        // Reload all widgets of this kind to fetch a new random quote
-        WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
-        
-        print("🔵 NextQuoteIntent: Widget timeline reload requested")
-        print("🔵 NextQuoteIntent: Intent completed successfully")
-        
-        return .result()
+        do {
+            // Assign a new quote to the authenticated user
+            let newQuote = try await supabase.assignRandomQuoteToUser()
+            print("🟢 [NextQuoteIntent] ✅ Successfully assigned new quote: '\(newQuote.quoteText)'")
+            
+            // Reload widget timelines to show the new quote
+            WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+            
+            return .result(dialog: "New quote assigned! '\(newQuote.quoteText)' by \(newQuote.authors.name)")
+            
+        } catch {
+            print("🔴 [NextQuoteIntent] Error assigning new quote: \(error)")
+            WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+            return .result(dialog: "Failed to get new quote. Please try again.")
+        }
     }
 } 

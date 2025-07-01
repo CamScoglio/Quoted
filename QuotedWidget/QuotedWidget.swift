@@ -13,8 +13,7 @@ import Supabase
 
 // MARK: - Widget Timeline Provider
 struct QuotedWidgetProvider: TimelineProvider {
-    private let supabase = SupabaseManager.shared.client
-    private let sharedManager = SharedQuoteManager.shared
+    private let supabase = SupabaseManager.shared
     
     func placeholder(in context: Context) -> QuotedWidgetEntry {
         QuotedWidgetEntry(
@@ -42,7 +41,8 @@ struct QuotedWidgetProvider: TimelineProvider {
                     themeColor: "#667eea",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: false
         )
     }
     
@@ -52,95 +52,116 @@ struct QuotedWidgetProvider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuotedWidgetEntry>) -> Void) {
-        print("🟢 Widget Timeline: getTimeline called!")
-        print("🟢 Widget Timeline: Context isPreview: \(context.isPreview)")
-        
         Task {
+            if context.isPreview {
+                let entry = placeholder(in: context)
+                let timeline = Timeline(entries: [entry], policy: .never)
+                completion(timeline)
+                return
+            }
+            
+            // Check authentication by actually trying to get current user
+            guard let currentUser = await supabase.getCurrentUser() else {
+                print("🔴 [Widget] User not authenticated - showing sign-in prompt")
+                let entry = createUnauthenticatedEntry()
+                let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
+                completion(timeline)
+                return
+            }
+            
+            print("🟢 [Widget] User authenticated: \(currentUser.id)")
+            
             do {
+                // Get user's daily quote, creating one if needed
                 let dailyQuote: DailyQuote
-                
-                if context.isPreview {
-                    print("🟢 Widget Timeline: Using placeholder for preview")
-                    // Use placeholder for preview
-                    dailyQuote = placeholder(in: context).dailyQuote
+                if let existingQuote = try await supabase.getUserDailyQuote() {
+                    print("🟢 [Widget] Found existing quote for today")
+                    dailyQuote = existingQuote
                 } else {
-                    // First, try to get the shared quote for consistency
-                    if let sharedQuote = await sharedManager.getCurrentQuote(),
-                       !(await sharedManager.shouldFetchNewQuote()) {
-                        print("🔄 Widget Timeline: Using shared quote for consistency")
-                        dailyQuote = sharedQuote
-                    } else {
-                        print("🟢 Widget Timeline: Fetching new quote from Supabase...")
-                        // Get a new quote and save it for consistency
-                        dailyQuote = try await getRandomQuote()
-                        await sharedManager.saveCurrentQuote(dailyQuote)
-                        print("🟢 Widget Timeline: Successfully fetched and saved quote: '\(dailyQuote.quoteText.prefix(50))...'")
-                        print("🟢 Widget Timeline: Quote author: \(dailyQuote.authors.name)")
-                    }
+                    print("🟡 [Widget] No quote for today, assigning new one")
+                    dailyQuote = try await supabase.assignRandomQuoteToUser()
                 }
                 
-                let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote)
+                let entry = QuotedWidgetEntry(
+                    date: Date(),
+                    dailyQuote: dailyQuote,
+                    isAuthenticated: true
+                )
                 
-                // Set next refresh for 24 hours from now to maintain daily update cycle
-                let nextRefresh = Date().addingTimeInterval(24 * 60 * 60)
-                
-                // Use .atEnd policy to allow manual refreshes via the Next button
-                let timeline = Timeline(entries: [entry], policy: .after(nextRefresh))
-                print("🟢 Widget Timeline: Timeline created successfully, calling completion")
+                let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(24 * 60 * 60)))
                 completion(timeline)
                 
             } catch {
-                print("🔴 Widget Timeline: Error occurred: \(error)")
-                // Fallback to placeholder on error
-                let entry = placeholder(in: context)
-                let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(3600))) // Retry in 1 hour
-                print("🟢 Widget Timeline: Using fallback placeholder due to error")
+                print("🔴 [Widget] Error loading quote: \(error)")
+                let entry = createErrorEntry(error: error)
+                let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(60 * 60)))
                 completion(timeline)
             }
         }
     }
     
-    private func getRandomQuote() async throws -> DailyQuote {
-        print("🟡 getRandomQuote: Starting Supabase query...")
-        
-        // First, get the total count of quotes
-        let countResponse = try await supabase
-            .from("quotes")
-            .select("id", head: true, count: .exact)
-            .execute()
-        
-        guard let totalCount = countResponse.count, totalCount > 0 else {
-            print("🔴 getRandomQuote: No quotes found in database!")
-            throw QuoteServiceError.noQuotesFound
-        }
-        
-        print("🟡 getRandomQuote: Found \(totalCount) total quotes")
-        
-        // Generate a random offset
-        let randomOffset = Int.random(in: 0..<totalCount)
-        print("🟡 getRandomQuote: Using random offset: \(randomOffset)")
-        
-        // Get a quote with the random offset
-        let response: [DailyQuote] = try await supabase
-            .from("quotes")
-            .select("""
-                *,
-                authors!inner(*),
-                categories!inner(*)
-            """)
-            .range(from: randomOffset, to: randomOffset)
-            .execute()
-            .value
-        
-        print("🟡 getRandomQuote: Received \(response.count) quotes from Supabase")
-        
-        guard let randomQuote = response.first else {
-            print("🔴 getRandomQuote: No quotes found in response!")
-            throw QuoteServiceError.noQuotesFound
-        }
-        
-        print("🟡 getRandomQuote: Successfully got quote: \"\(randomQuote.quoteText.prefix(50))...\"")
-        return randomQuote
+    /// Create an entry for unauthenticated users
+    private func createUnauthenticatedEntry() -> QuotedWidgetEntry {
+        return QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "Sign in to the app to see your daily quote",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
+                isFeatured: false,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Quoted App",
+                    profession: "",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Authentication",
+                    icon: "person.fill",
+                    themeColor: "#667eea",
+                    createdAt: Date()
+                )
+            ),
+            isAuthenticated: false
+        )
+    }
+    
+    /// Create an entry for error states
+    private func createErrorEntry(error: Error) -> QuotedWidgetEntry {
+        return QuotedWidgetEntry(
+            date: Date(),
+            dailyQuote: DailyQuote(
+                id: UUID(),
+                quoteText: "Unable to load your daily quote. Please try again later.",
+                authorId: UUID(),
+                categoryId: UUID(),
+                designTheme: "minimal",
+                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
+                isFeatured: false,
+                createdAt: Date(),
+                authors: Author(
+                    id: UUID(),
+                    name: "Error",
+                    profession: "",
+                    bio: nil,
+                    imageUrl: nil
+                ),
+                categories: Category(
+                    id: UUID(),
+                    name: "Error",
+                    icon: "exclamationmark.circle",
+                    themeColor: "#667eea",
+                    createdAt: Date()
+                )
+            ),
+            isAuthenticated: true
+        )
     }
 }
 
@@ -148,6 +169,7 @@ struct QuotedWidgetProvider: TimelineProvider {
 struct QuotedWidgetEntry: TimelineEntry {
     let date: Date
     let dailyQuote: DailyQuote
+    let isAuthenticated: Bool
 }
 
 // MARK: - Widget Views
@@ -156,29 +178,47 @@ struct QuotedWidgetSmallView: View {
     
     var body: some View {
         VStack(spacing: WidgetStyles.Layout.Spacing.medium) {
-            // Next button
+            // Next button (only show for authenticated users)
             HStack {
                 Spacer()
-                Button(intent: NextQuoteIntent()) {
+                if entry.isAuthenticated {
+                    Button(intent: NextQuoteIntent()) {
+                        HStack(spacing: WidgetStyles.Layout.Spacing.small) {
+                            Text(WidgetStyles.Labels.nextButtonText)
+                                .font(WidgetStyles.Typography.Small.buttonFont)
+                                .fontWeight(WidgetStyles.Typography.Small.buttonFontWeight)
+                            Image(systemName: WidgetStyles.IconNames.nextArrow)
+                                .font(WidgetStyles.Typography.Icons.buttonIcon)
+                        }
+                        .foregroundColor(WidgetStyles.Colors.buttonText)
+                        .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
+                        .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
+                        .background(
+                            RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
+                                .fill(WidgetStyles.Colors.buttonBackground)
+                        )
+                    }
+                } else {
+                    // Show disabled button for unauthenticated users
                     HStack(spacing: WidgetStyles.Layout.Spacing.small) {
-                        Text(WidgetStyles.Labels.nextButtonText)
+                        Text("Sign In")
                             .font(WidgetStyles.Typography.Small.buttonFont)
                             .fontWeight(WidgetStyles.Typography.Small.buttonFontWeight)
-                        Image(systemName: WidgetStyles.IconNames.nextArrow)
+                        Image(systemName: "person.fill")
                             .font(WidgetStyles.Typography.Icons.buttonIcon)
                     }
-                    .foregroundColor(WidgetStyles.Colors.buttonText)
+                    .foregroundColor(WidgetStyles.Colors.buttonText.opacity(0.6))
                     .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
                     .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
                     .background(
                         RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
-                            .fill(WidgetStyles.Colors.buttonBackground)
+                            .fill(WidgetStyles.Colors.buttonBackground.opacity(0.6))
                     )
                 }
             }
             
             // Quote icon
-            Image(systemName: WidgetStyles.IconNames.quote)
+            Image(systemName: entry.isAuthenticated ? WidgetStyles.IconNames.quote : "person.fill")
                 .font(WidgetStyles.Typography.Icons.smallQuoteIcon)
                 .foregroundColor(WidgetStyles.Colors.buttonText)
             
@@ -215,26 +255,44 @@ struct QuotedWidgetMediumView: View {
             VStack(alignment: .leading, spacing: WidgetStyles.Layout.Spacing.large) {
                 // Next button
                 HStack {
-                    Button(intent: NextQuoteIntent()) {
+                    if entry.isAuthenticated {
+                        Button(intent: NextQuoteIntent()) {
+                            HStack(spacing: WidgetStyles.Layout.Spacing.small) {
+                                Text(WidgetStyles.Labels.nextButtonText)
+                                    .font(WidgetStyles.Typography.Medium.buttonFont)
+                                    .fontWeight(WidgetStyles.Typography.Medium.buttonFontWeight)
+                                Image(systemName: WidgetStyles.IconNames.nextArrow)
+                                    .font(WidgetStyles.Typography.Icons.buttonIcon)
+                            }
+                            .foregroundColor(WidgetStyles.Colors.buttonText)
+                            .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
+                            .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
+                            .background(
+                                RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
+                                    .fill(WidgetStyles.Colors.buttonBackground)
+                            )
+                        }
+                    } else {
+                        // Show sign-in prompt for unauthenticated users
                         HStack(spacing: WidgetStyles.Layout.Spacing.small) {
-                            Text(WidgetStyles.Labels.nextButtonText)
+                            Text("Sign In to App")
                                 .font(WidgetStyles.Typography.Medium.buttonFont)
                                 .fontWeight(WidgetStyles.Typography.Medium.buttonFontWeight)
-                            Image(systemName: WidgetStyles.IconNames.nextArrow)
+                            Image(systemName: "person.fill")
                                 .font(WidgetStyles.Typography.Icons.buttonIcon)
                         }
-                        .foregroundColor(WidgetStyles.Colors.buttonText)
+                        .foregroundColor(WidgetStyles.Colors.buttonText.opacity(0.6))
                         .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
                         .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
                         .background(
                             RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
-                                .fill(WidgetStyles.Colors.buttonBackground)
+                                .fill(WidgetStyles.Colors.buttonBackground.opacity(0.6))
                         )
                     }
                     
                     Spacer()
                     
-                    Image(systemName: WidgetStyles.IconNames.quote)
+                    Image(systemName: entry.isAuthenticated ? WidgetStyles.IconNames.quote : "person.fill")
                         .font(WidgetStyles.Typography.Icons.mediumQuoteIcon)
                         .foregroundColor(WidgetStyles.Colors.secondaryText)
                 }
@@ -255,9 +313,11 @@ struct QuotedWidgetMediumView: View {
                         .fontWeight(WidgetStyles.Typography.Medium.authorFontWeight)
                         .foregroundColor(WidgetStyles.Colors.primaryText)
                     
-                    Text(entry.dailyQuote.authors.profession)
-                        .font(WidgetStyles.Typography.Medium.professionFont)
-                        .foregroundColor(WidgetStyles.Colors.tertiaryText)
+                    if !entry.dailyQuote.authors.profession.isEmpty {
+                        Text(entry.dailyQuote.authors.profession)
+                            .font(WidgetStyles.Typography.Medium.professionFont)
+                            .foregroundColor(WidgetStyles.Colors.tertiaryText)
+                    }
                 }
             }
             .padding(WidgetStyles.Layout.mediumWidgetPadding)
@@ -279,7 +339,7 @@ struct QuotedWidgetLargeView: View {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: WidgetStyles.Layout.Spacing.small) {
-                    Text(WidgetStyles.Labels.dailyQuoteHeader)
+                    Text(entry.isAuthenticated ? WidgetStyles.Labels.dailyQuoteHeader : "Welcome to Quoted")
                         .font(WidgetStyles.Typography.Large.headerFont)
                         .fontWeight(WidgetStyles.Typography.Large.headerFontWeight)
                         .foregroundColor(WidgetStyles.Colors.secondaryText)
@@ -291,21 +351,39 @@ struct QuotedWidgetLargeView: View {
                 
                 Spacer()
                 
-                // Next button
-                Button(intent: NextQuoteIntent()) {
+                // Next button (only for authenticated users)
+                if entry.isAuthenticated {
+                    Button(intent: NextQuoteIntent()) {
+                        HStack(spacing: WidgetStyles.Layout.Spacing.small + 2) {
+                            Text(WidgetStyles.Labels.nextButtonText)
+                                .font(WidgetStyles.Typography.Large.buttonFont)
+                                .fontWeight(WidgetStyles.Typography.Large.buttonFontWeight)
+                            Image(systemName: WidgetStyles.IconNames.nextArrow)
+                                .font(WidgetStyles.Typography.Icons.buttonIcon)
+                        }
+                        .foregroundColor(WidgetStyles.Colors.buttonText)
+                        .padding(.horizontal, WidgetStyles.Layout.Button.largeHorizontalPadding)
+                        .padding(.vertical, WidgetStyles.Layout.Button.largeVerticalPadding)
+                        .background(
+                            RoundedRectangle(cornerRadius: WidgetStyles.Layout.largeButtonCornerRadius)
+                                .fill(WidgetStyles.Colors.buttonBackground)
+                        )
+                    }
+                } else {
+                    // Show sign-in button for unauthenticated users
                     HStack(spacing: WidgetStyles.Layout.Spacing.small + 2) {
-                        Text(WidgetStyles.Labels.nextButtonText)
+                        Text("Sign In")
                             .font(WidgetStyles.Typography.Large.buttonFont)
                             .fontWeight(WidgetStyles.Typography.Large.buttonFontWeight)
-                        Image(systemName: WidgetStyles.IconNames.nextArrow)
+                        Image(systemName: "person.fill")
                             .font(WidgetStyles.Typography.Icons.buttonIcon)
                     }
-                    .foregroundColor(WidgetStyles.Colors.buttonText)
+                    .foregroundColor(WidgetStyles.Colors.buttonText.opacity(0.6))
                     .padding(.horizontal, WidgetStyles.Layout.Button.largeHorizontalPadding)
                     .padding(.vertical, WidgetStyles.Layout.Button.largeVerticalPadding)
                     .background(
                         RoundedRectangle(cornerRadius: WidgetStyles.Layout.largeButtonCornerRadius)
-                            .fill(WidgetStyles.Colors.buttonBackground)
+                            .fill(WidgetStyles.Colors.buttonBackground.opacity(0.6))
                     )
                 }
             }
@@ -315,7 +393,7 @@ struct QuotedWidgetLargeView: View {
             // Quote content
             VStack(spacing: WidgetStyles.Layout.Spacing.extraLarge) {
                 // Quote mark
-                Image(systemName: WidgetStyles.IconNames.quote)
+                Image(systemName: entry.isAuthenticated ? WidgetStyles.IconNames.quote : "person.fill")
                     .font(WidgetStyles.Typography.Icons.largeQuoteIcon)
                     .foregroundColor(WidgetStyles.Colors.secondaryText)
                 
@@ -336,9 +414,11 @@ struct QuotedWidgetLargeView: View {
                     .font(WidgetStyles.Typography.Large.authorFont)
                     .foregroundColor(WidgetStyles.Colors.primaryText)
                 
-                Text(entry.dailyQuote.authors.profession)
-                    .font(WidgetStyles.Typography.Large.professionFont)
-                    .foregroundColor(WidgetStyles.Colors.secondaryText)
+                if !entry.dailyQuote.authors.profession.isEmpty {
+                    Text(entry.dailyQuote.authors.profession)
+                        .font(WidgetStyles.Typography.Large.professionFont)
+                        .foregroundColor(WidgetStyles.Colors.secondaryText)
+                }
             }
         }
         .padding(WidgetStyles.Layout.largeWidgetPadding)
@@ -414,7 +494,8 @@ struct QuotedWidget_Previews: PreviewProvider {
                     themeColor: "#667eea",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: false
         )
         
         Group {

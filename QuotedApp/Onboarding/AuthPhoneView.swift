@@ -179,6 +179,16 @@ struct AuthPhoneView: View {
             
             if success {
                 print("🔴 ✅ [AuthPhoneView] Phone verification and authentication successful!")
+                
+                // Create user_daily_quotes row immediately after successful authentication
+                do {
+                    _ = try await SupabaseManager.shared.assignRandomQuoteToUser()
+                    print("🔴 ✅ [AuthPhoneView] user_daily_quotes row created for new user")
+                } catch {
+                    print("🔴 ❌ [AuthPhoneView] Failed to create user_daily_quotes row: \(error)")
+                    // Continue to offboarding even if quote assignment fails
+                }
+                
                 navigateToOffboarding = true
             } else {
                 print("🔴 ❌ [AuthPhoneView] Phone verification failed")

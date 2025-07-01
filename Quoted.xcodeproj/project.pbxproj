@@ -11,20 +11,20 @@
 		217502462E10C956007BBB58 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502202E10C955007BBB58 /* ContentView.swift */; };
 		217502512E10CB0E007BBB58 /* QuotedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175021E2E10C955007BBB58 /* QuotedApp.swift */; };
 		217502A32E10CC43007BBB58 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029A2E10CC43007BBB58 /* Category.swift */; };
-		217502A42E10CC43007BBB58 /* QuoteRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029F2E10CC43007BBB58 /* QuoteRepository.swift */; };
+
 		217502A52E10CC43007BBB58 /* DailyQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029B2E10CC43007BBB58 /* DailyQuote.swift */; };
 		217502A72E10CC43007BBB58 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029C2E10CC43007BBB58 /* Quote.swift */; };
 		217502A82E10CC43007BBB58 /* Author.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502992E10CC43007BBB58 /* Author.swift */; };
 		217502A92E10CC43007BBB58 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502A02E10CC43007BBB58 /* SupabaseService.swift */; };
-		217502AA2E10CC43007BBB58 /* SharedQuoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502972E10CC43007BBB58 /* SharedQuoteManager.swift */; };
+
 		217502AB2E10CC43007BBB58 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502952E10CC43007BBB58 /* Color+Extensions.swift */; };
 		217502AC2E10CC43007BBB58 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029A2E10CC43007BBB58 /* Category.swift */; };
-		217502AD2E10CC43007BBB58 /* QuoteRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029F2E10CC43007BBB58 /* QuoteRepository.swift */; };
+
 		217502AE2E10CC43007BBB58 /* DailyQuote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029B2E10CC43007BBB58 /* DailyQuote.swift */; };
 		217502B02E10CC43007BBB58 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2175029C2E10CC43007BBB58 /* Quote.swift */; };
 		217502B12E10CC43007BBB58 /* Author.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502992E10CC43007BBB58 /* Author.swift */; };
 		217502B22E10CC43007BBB58 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502A02E10CC43007BBB58 /* SupabaseService.swift */; };
-		217502B32E10CC43007BBB58 /* SharedQuoteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502972E10CC43007BBB58 /* SharedQuoteManager.swift */; };
+
 		217502B42E10CC43007BBB58 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502952E10CC43007BBB58 /* Color+Extensions.swift */; };
 		217502BF2E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
 		217502C02E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
@@ -78,12 +78,12 @@
 		217502202E10C955007BBB58 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		217502212E10C955007BBB58 /* QuoteDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteDisplayView.swift; sourceTree = "<group>"; };
 		217502952E10CC43007BBB58 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
-		217502972E10CC43007BBB58 /* SharedQuoteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedQuoteManager.swift; sourceTree = "<group>"; };
+
 		217502992E10CC43007BBB58 /* Author.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Author.swift; sourceTree = "<group>"; };
 		2175029A2E10CC43007BBB58 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 		2175029B2E10CC43007BBB58 /* DailyQuote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuote.swift; sourceTree = "<group>"; };
 		2175029C2E10CC43007BBB58 /* Quote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
-		2175029F2E10CC43007BBB58 /* QuoteRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteRepository.swift; sourceTree = "<group>"; };
+
 		217502A02E10CC43007BBB58 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		217502BE2E10D06C007BBB58 /* Notes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
 		21CAB2242E12135E008E5EB8 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
@@ -123,6 +123,12 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				Info.plist,
+				Intents/NextQuoteIntent.swift,
+				QuotedWidget.swift,
+				QuotedWidgetBundle.swift,
+				QuotedWidgetControl.swift,
+				QuotedWidgetLiveActivity.swift,
+				WidgetStyles.swift,
 			);
 			target = 21D570532E0CDDA400D3C33D /* Quoted */;
 		};
@@ -242,7 +248,6 @@
 			children = (
 				21CAB2262E12138A008E5EB8 /* StorageManager.swift */,
 				21CAB2272E12138A008E5EB8 /* TwilioManager.swift */,
-				217502972E10CC43007BBB58 /* SharedQuoteManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -261,7 +266,6 @@
 		217502A12E10CC43007BBB58 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				2175029F2E10CC43007BBB58 /* QuoteRepository.swift */,
 				217502A02E10CC43007BBB58 /* SupabaseService.swift */,
 			);
 			path = Services;
@@ -450,7 +454,7 @@
 				21CAB2392E1213A8008E5EB8 /* EmailView.swift in Sources */,
 				217502432E10C956007BBB58 /* QuoteDisplayView.swift in Sources */,
 				217502A32E10CC43007BBB58 /* Category.swift in Sources */,
-				217502A42E10CC43007BBB58 /* QuoteRepository.swift in Sources */,
+
 				217502A52E10CC43007BBB58 /* DailyQuote.swift in Sources */,
 				21CAB22A2E12138A008E5EB8 /* TwilioManager.swift in Sources */,
 				21CAB22B2E12138A008E5EB8 /* StorageManager.swift in Sources */,
@@ -458,7 +462,7 @@
 				217502A72E10CC43007BBB58 /* Quote.swift in Sources */,
 				217502A82E10CC43007BBB58 /* Author.swift in Sources */,
 				217502A92E10CC43007BBB58 /* SupabaseService.swift in Sources */,
-				217502AA2E10CC43007BBB58 /* SharedQuoteManager.swift in Sources */,
+
 				217502AB2E10CC43007BBB58 /* Color+Extensions.swift in Sources */,
 				217502462E10C956007BBB58 /* ContentView.swift in Sources */,
 				217502BF2E10D06F007BBB58 /* Notes.swift in Sources */,
@@ -473,13 +477,13 @@
 				21CAB2282E12138A008E5EB8 /* TwilioManager.swift in Sources */,
 				21CAB2292E12138A008E5EB8 /* StorageManager.swift in Sources */,
 				217502AC2E10CC43007BBB58 /* Category.swift in Sources */,
-				217502AD2E10CC43007BBB58 /* QuoteRepository.swift in Sources */,
+
 				217502AE2E10CC43007BBB58 /* DailyQuote.swift in Sources */,
 				217502C02E10D06F007BBB58 /* Notes.swift in Sources */,
 				217502B02E10CC43007BBB58 /* Quote.swift in Sources */,
 				217502B12E10CC43007BBB58 /* Author.swift in Sources */,
 				217502B22E10CC43007BBB58 /* SupabaseService.swift in Sources */,
-				217502B32E10CC43007BBB58 /* SharedQuoteManager.swift in Sources */,
+
 				217502B42E10CC43007BBB58 /* Color+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

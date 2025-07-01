@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import WidgetKit
 
 struct ContentView: View {
-    @StateObject private var quoteService = QuoteService()
     @State private var currentQuote: DailyQuote?
     @State private var isLoading = false
     @State private var errorMessage: String?
+    
+    private let supabase = SupabaseManager.shared
     
     var body: some View {
         NavigationView {
@@ -38,26 +40,42 @@ struct ContentView: View {
                 
                 VStack(spacing: 30) {
                     if isLoading {
-                        ProgressView("Loading quote...")
+                        ProgressView("Loading your daily quote...")
                             .foregroundColor(.white)
                     } else if let quote = currentQuote {
                         QuoteDisplayView(quote: quote)
                     } else if let error = errorMessage {
-                        Text("Error: \(error)")
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
+                        VStack(spacing: 20) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 40))
+                                .foregroundColor(.white.opacity(0.8))
+                            
+                            Text("Error")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                            
+                            Text(error)
+                                .foregroundColor(.white.opacity(0.9))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
                     }
                     
-                    // Refresh button
-                    Button(action: loadRandomQuote) {
-                        HStack {
-                            Image(systemName: "arrow.clockwise")
-                            Text("New Quote")
+                    // Action buttons
+                    HStack(spacing: 20) {
+                        // New quote button
+                        Button(action: { Task { await loadNewQuote() } }) {
+                            HStack {
+                                Image(systemName: "sparkles")
+                                Text("New Quote")
+                            }
+                            .padding()
+                            .background(Color.white.opacity(0.2))
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                         }
-                        .padding()
-                        .background(Color.white.opacity(0.2))
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .disabled(isLoading)
                     }
                 }
                 .padding()
@@ -67,59 +85,100 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Sign Out") {
-                        Task {
-                            print("🔴 [ContentView] Sign out button tapped")
-                            let success = await SupabaseManager.shared.signOut()
-                            if success {
-                                print("🔴 ✅ [ContentView] Sign out successful")
-                            } else {
-                                print("🔴 ❌ [ContentView] Sign out failed")
-                            }
-                        }
+                        Task { await supabase.signOut() }
                     }
                     .foregroundColor(.white)
                 }
             }
         }
         .task {
-            await loadTodaysQuote()
+            await loadDailyQuote()
+            
+            // Force widget reload when ContentView appears (user is authenticated)
+            print("🔄 [ContentView] User authenticated - forcing widget reload")
+            WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
         }
     }
     
-    private func loadTodaysQuote() async {
+    private func loadDailyQuote() async {
         isLoading = true
         errorMessage = nil
         
-        do {
-            // Try to get shared quote first for consistency
-            if let sharedQuote = await quoteService.getCurrentSharedQuote() {
-                currentQuote = sharedQuote
-                print("🔄 ContentView: Loaded shared quote for consistency")
-            } else {
-                currentQuote = try await quoteService.getTodaysQuote()
-                print("🆕 ContentView: Loaded fresh today's quote")
+        // Retry logic to handle race condition with authentication
+        var retryCount = 0
+        let maxRetries = 3
+        let retryDelay: UInt64 = 1_000_000_000 // 1 second in nanoseconds
+        
+        while retryCount < maxRetries {
+            do {
+                // Try to get the user's daily quote
+                if let existingQuote = try await supabase.getUserDailyQuote() {
+                    currentQuote = existingQuote
+                    isLoading = false
+                    return
+                } else {
+                    // No row exists yet - this might be a race condition with authentication
+                    if retryCount < maxRetries - 1 {
+                        print("📝 [ContentView] No user_daily_quotes row found - retrying in 1 second (attempt \(retryCount + 1)/\(maxRetries))")
+                        retryCount += 1
+                        do {
+                            try await Task.sleep(nanoseconds: retryDelay)
+                        } catch {
+                            print("📝 [ContentView] Sleep interrupted: \(error)")
+                        }
+                        continue
+                    } else {
+                        // Final attempt failed - show error
+                        errorMessage = "No daily quote found. Please try refreshing or contact support."
+                        currentQuote = nil
+                    }
+                }
+            } catch {
+                if retryCount < maxRetries - 1 {
+                    print("📝 [ContentView] Error loading quote - retrying in 1 second (attempt \(retryCount + 1)/\(maxRetries)): \(error)")
+                    retryCount += 1
+                    do {
+                        try await Task.sleep(nanoseconds: retryDelay)
+                    } catch {
+                        print("📝 [ContentView] Sleep interrupted: \(error)")
+                    }
+                    continue
+                } else {
+                    // Final attempt failed - show error
+                    errorMessage = error.localizedDescription
+                }
             }
-        } catch {
-            errorMessage = error.localizedDescription
+            break
         }
         
         isLoading = false
     }
     
-    private func loadRandomQuote() {
-        Task {
-            isLoading = true
-            errorMessage = nil
+    private func loadNewQuote() async {
+        print("🎲 [ContentView] loadNewQuote() called - User pressed New Quote button")
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            print("🎲 [ContentView] Calling assignRandomQuoteToUser()...")
+            let newQuote = try await supabase.assignRandomQuoteToUser()
+            print("🎲 [ContentView] ✅ Received new quote: '\(newQuote.quoteText)' by \(newQuote.authors.name)")
             
-            do {
-                currentQuote = try await quoteService.fetchNewQuote()
-                print("🎲 ContentView: Loaded new random quote")
-            } catch {
-                errorMessage = error.localizedDescription
-            }
+            // Update the UI
+            currentQuote = newQuote
+            print("🎲 [ContentView] ✅ UI updated with new quote")
             
-            isLoading = false
+            // Also force widget reload after new quote
+            print("🎲 [ContentView] Forcing widget reload after new quote assignment")
+            WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+            
+        } catch {
+            print("🔴 [ContentView] Error in loadNewQuote: \(error)")
+            errorMessage = error.localizedDescription
         }
+        
+        print("🎲 [ContentView] loadNewQuote() completed, isLoading = false")
+        isLoading = false
     }
 }
 

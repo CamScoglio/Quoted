@@ -357,7 +357,7 @@ struct LiveWidgetPreviews: PreviewProvider {
             date: Date(),
             dailyQuote: DailyQuote(
                 id: UUID(),
-                quoteText: "Be yourself; everyone else is already taken.",
+                quoteText: "The only way to do great work is to love what you do.",
                 authorId: UUID(),
                 categoryId: UUID(),
                 designTheme: "minimal",
@@ -366,19 +366,20 @@ struct LiveWidgetPreviews: PreviewProvider {
                 createdAt: Date(),
                 authors: Author(
                     id: UUID(),
-                    name: "Oscar Wilde",
-                    profession: "Writer",
+                    name: "Steve Jobs",
+                    profession: "Entrepreneur",
                     bio: nil,
                     imageUrl: nil
                 ),
                 categories: Category(
                     id: UUID(),
-                    name: "Self",
-                    icon: "person.fill",
+                    name: "Motivation",
+                    icon: "star.fill",
                     themeColor: "#667eea",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: true
         )
     }
     
@@ -408,7 +409,8 @@ struct LiveWidgetPreviews: PreviewProvider {
                     themeColor: "#4facfe",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: true
         )
     }
     
@@ -438,7 +440,8 @@ struct LiveWidgetPreviews: PreviewProvider {
                     themeColor: "#fa709a",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: true
         )
     }
 }
@@ -501,7 +504,8 @@ struct LiveStyleEditor: PreviewProvider {
                     themeColor: "#ff9a9e",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: true
         )
     }
     
@@ -536,7 +540,8 @@ struct LiveStyleEditor: PreviewProvider {
                     themeColor: "#a8edea",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: true
         )
     }
     
@@ -571,7 +576,8 @@ struct LiveStyleEditor: PreviewProvider {
                     themeColor: "#ffecd2",
                     createdAt: Date()
                 )
-            )
+            ),
+            isAuthenticated: true
         )
     }
 }
