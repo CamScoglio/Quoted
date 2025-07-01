@@ -12,7 +12,7 @@ import AppIntents
 import Supabase
 
 // MARK: - Widget Timeline Provider
-struct QuotedWidgetProvider: TimelineProvider {
+struct QuotedWidgetProvider: AppIntentTimelineProvider {
     private let supabase = SupabaseManager.shared
     
     func placeholder(in context: Context) -> QuotedWidgetEntry {
@@ -42,134 +42,136 @@ struct QuotedWidgetProvider: TimelineProvider {
                     createdAt: Date()
                 )
             ),
-            isAuthenticated: false
-        )
-    }
-    
-    func getSnapshot(in context: Context, completion: @escaping (QuotedWidgetEntry) -> Void) {
-        let entry = placeholder(in: context)
-        completion(entry)
-    }
-    
-    func getTimeline(in context: Context, completion: @escaping (Timeline<QuotedWidgetEntry>) -> Void) {
-        Task {
-            if context.isPreview {
-                let entry = placeholder(in: context)
-                let timeline = Timeline(entries: [entry], policy: .never)
-                completion(timeline)
-                return
-            }
-            
-            // Check authentication using shared state
-            guard supabase.isUserAuthenticated() else {
-                print("🔴 [Widget] User not authenticated - showing sign-in prompt")
-                let entry = createUnauthenticatedEntry()
-                let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
-                completion(timeline)
-                return
-            }
-            
-            print("🟢 [Widget] User authenticated")
-            
-            do {
-                // Get user's daily quote, creating one if needed
-                let dailyQuote: DailyQuote
-                if let existingQuote = try await supabase.getUserDailyQuote() {
-                    print("🟢 [Widget] Found existing quote for today")
-                    dailyQuote = existingQuote
-                } else {
-                    print("🟡 [Widget] No quote for today, assigning new one")
-                    dailyQuote = try await supabase.assignRandomQuoteToUser()
-                }
-                
-                let entry = QuotedWidgetEntry(
-                    date: Date(),
-                    dailyQuote: dailyQuote,
-                    isAuthenticated: true
-                )
-                
-                let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(24 * 60 * 60)))
-                completion(timeline)
-                
-            } catch {
-                print("🔴 [Widget] Error loading quote: \(error)")
-                let entry = createErrorEntry(error: error)
-                let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(60 * 60)))
-                completion(timeline)
-            }
-        }
-    }
-    
-    /// Create an entry for unauthenticated users
-    private func createUnauthenticatedEntry() -> QuotedWidgetEntry {
-        return QuotedWidgetEntry(
-            date: Date(),
-            dailyQuote: DailyQuote(
-                id: UUID(),
-                quoteText: "Sign in to the app to see your daily quote",
-                authorId: UUID(),
-                categoryId: UUID(),
-                designTheme: "minimal",
-                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
-                isFeatured: false,
-                createdAt: Date(),
-                authors: Author(
-                    id: UUID(),
-                    name: "Quoted App",
-                    profession: "",
-                    bio: nil,
-                    imageUrl: nil
-                ),
-                categories: Category(
-                    id: UUID(),
-                    name: "Authentication",
-                    icon: "person.fill",
-                    themeColor: "#667eea",
-                    createdAt: Date()
-                )
-            ),
-            isAuthenticated: false
-        )
-    }
-    
-    /// Create an entry for error states
-    private func createErrorEntry(error: Error) -> QuotedWidgetEntry {
-        return QuotedWidgetEntry(
-            date: Date(),
-            dailyQuote: DailyQuote(
-                id: UUID(),
-                quoteText: "Unable to load your daily quote. Please try again later.",
-                authorId: UUID(),
-                categoryId: UUID(),
-                designTheme: "minimal",
-                backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
-                isFeatured: false,
-                createdAt: Date(),
-                authors: Author(
-                    id: UUID(),
-                    name: "Error",
-                    profession: "",
-                    bio: nil,
-                    imageUrl: nil
-                ),
-                categories: Category(
-                    id: UUID(),
-                    name: "Error",
-                    icon: "exclamationmark.circle",
-                    themeColor: "#667eea",
-                    createdAt: Date()
-                )
-            ),
             isAuthenticated: true
         )
+    }
+    
+    func snapshot(for configuration: NextQuoteIntent, in context: Context) async -> QuotedWidgetEntry {
+        print("🔵 [Widget Snapshot] Starting snapshot generation")
+        print("🔍 [Widget Snapshot] Context preview: \(context.isPreview)")
+        
+        if context.isPreview {
+            return placeholder(in: context)
+        }
+        
+        guard supabase.isUserAuthenticated() else {
+            print("🔴 [Widget Snapshot] User not authenticated - returning unauthenticated entry")
+            return QuotedWidgetEntry(
+                date: Date(),
+                dailyQuote: nil,
+                isAuthenticated: false
+            )
+        }
+        
+        print("🟢 [Widget Snapshot] User authenticated - attempting to get daily quote")
+        // Try to get the user's daily quote
+        do {
+            let dailyQuote = try await supabase.getUserDailyQuote()
+            print("🟢 [Widget Snapshot] Successfully got daily quote: \(dailyQuote?.quoteText ?? "nil")")
+            return QuotedWidgetEntry(
+                date: Date(),
+                dailyQuote: dailyQuote,
+                isAuthenticated: true
+            )
+        } catch {
+            print("🔴 [Widget Snapshot] Error getting daily quote: \(error)")
+            print("🔴 [Widget Snapshot] Error details: \(error.localizedDescription)")
+            // Return placeholder on error but keep authenticated state
+            let placeholder = placeholder(in: context)
+            return QuotedWidgetEntry(
+                date: Date(),
+                dailyQuote: placeholder.dailyQuote,
+                isAuthenticated: true
+            )
+        }
+    }
+
+    func timeline(for configuration: NextQuoteIntent, in context: Context) async -> Timeline<QuotedWidgetEntry> {
+        print("🔵 [Widget Timeline] Starting timeline generation")
+        print("🔍 [Widget Timeline] Context family: \(context.family)")
+        print("🔍 [Widget Timeline] Context preview: \(context.isPreview)")
+        
+        var entries: [QuotedWidgetEntry] = []
+        let currentDate = Date()
+        
+        if context.isPreview {
+            let entry = placeholder(in: context)
+            return Timeline(entries: [entry], policy: .never)
+        }
+        
+        // Debug authentication state
+        let isAuth = supabase.isUserAuthenticated()
+        let userId = supabase.getSharedUserId()
+        print("🔍 [Widget Timeline] Authentication check - isAuth: \(isAuth), userId: \(userId ?? "nil")")
+        
+        // Check authentication using shared state
+        guard supabase.isUserAuthenticated() else {
+            print("🔴 [Widget Timeline] User not authenticated - showing sign-in prompt")
+            let entry = QuotedWidgetEntry(
+                date: currentDate,
+                dailyQuote: nil,
+                isAuthenticated: false
+            )
+            print("🔴 [Widget Timeline] Returning unauthenticated timeline")
+            return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
+        }
+        
+        print("🟢 [Widget Timeline] User authenticated")
+        
+        do {
+            let dailyQuote = try await supabase.getUserDailyQuote()
+            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote, isAuthenticated: true)
+            // Update once per day at midnight
+            let tomorrow = Calendar.current.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
+            return Timeline(entries: [entry], policy: .after(tomorrow))
+        } catch {
+            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: nil, isAuthenticated: true)
+            // Retry in 30 minutes if there was an error
+            return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
+        }
     }
 }
 
 // MARK: - Widget Entry
 struct QuotedWidgetEntry: TimelineEntry {
     let date: Date
-    let dailyQuote: DailyQuote
+    let dailyQuote: DailyQuote?
     let isAuthenticated: Bool
+    
+    // Convenience initializer for authenticated entries with quote
+    init(date: Date, dailyQuote: DailyQuote?, isAuthenticated: Bool = true) {
+        self.date = date
+        self.dailyQuote = dailyQuote
+        self.isAuthenticated = isAuthenticated
+    }
+    
+    // Computed property to get a safe daily quote (for UI display)
+    var safeDailyQuote: DailyQuote {
+        return dailyQuote ?? DailyQuote(
+            id: UUID(),
+            quoteText: isAuthenticated ? "Unable to load your daily quote" : "Sign in to the app to see your daily quotes",
+            authorId: UUID(),
+            categoryId: UUID(),
+            designTheme: "minimal",
+            backgroundGradient: ["start": "#667eea", "end": "#764ba2"],
+            isFeatured: true,
+            createdAt: Date(),
+            authors: Author(
+                id: UUID(),
+                name: isAuthenticated ? "Quoted" : "Welcome",
+                profession: "",
+                bio: nil,
+                imageUrl: nil
+            ),
+            categories: Category(
+                id: UUID(),
+                name: "System",
+                icon: "person.fill",
+                themeColor: "#667eea",
+                createdAt: Date()
+            )
+        )
+    }
 }
 
 // MARK: - Widget Views
@@ -223,7 +225,7 @@ struct QuotedWidgetSmallView: View {
                 .foregroundColor(WidgetStyles.Colors.buttonText)
             
             // Truncated quote text
-            Text(WidgetStyles.truncatedQuote(entry.dailyQuote.quoteText))
+            Text(WidgetStyles.truncatedQuote(entry.safeDailyQuote.quoteText))
                 .font(WidgetStyles.Typography.Small.quoteFont)
                 .fontWeight(WidgetStyles.Typography.Small.quoteFontWeight)
                 .foregroundColor(WidgetStyles.Colors.primaryText)
@@ -233,7 +235,7 @@ struct QuotedWidgetSmallView: View {
             Spacer()
             
             // Author name
-            Text("\(WidgetStyles.Labels.authorPrefix)\(entry.dailyQuote.authors.name)")
+            Text("\(WidgetStyles.Labels.authorPrefix)\(entry.safeDailyQuote.authors.name)")
                 .font(WidgetStyles.Typography.Small.authorFont)
                 .fontWeight(WidgetStyles.Typography.Small.authorFontWeight)
                 .foregroundColor(WidgetStyles.Colors.secondaryText)
@@ -242,7 +244,7 @@ struct QuotedWidgetSmallView: View {
         .padding(WidgetStyles.Layout.smallWidgetPadding)
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
         .containerBackground(for: .widget) {
-            WidgetStyles.backgroundGradient(for: entry.dailyQuote)
+            WidgetStyles.backgroundGradient(for: entry.safeDailyQuote)
         }
     }
 }
@@ -298,7 +300,7 @@ struct QuotedWidgetMediumView: View {
                 }
                 
                 // Quote text
-                Text(entry.dailyQuote.quoteText)
+                Text(entry.safeDailyQuote.quoteText)
                     .font(WidgetStyles.Typography.Medium.quoteFont)
                     .foregroundColor(WidgetStyles.Colors.primaryText)
                     .lineLimit(WidgetStyles.TextLimits.mediumQuoteLineLimit)
@@ -308,13 +310,13 @@ struct QuotedWidgetMediumView: View {
                 
                 // Author info
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(WidgetStyles.Labels.authorPrefix)\(entry.dailyQuote.authors.name)")
+                    Text("\(WidgetStyles.Labels.authorPrefix)\(entry.safeDailyQuote.authors.name)")
                         .font(WidgetStyles.Typography.Medium.authorFont)
                         .fontWeight(WidgetStyles.Typography.Medium.authorFontWeight)
                         .foregroundColor(WidgetStyles.Colors.primaryText)
                     
-                    if !entry.dailyQuote.authors.profession.isEmpty {
-                        Text(entry.dailyQuote.authors.profession)
+                    if !entry.safeDailyQuote.authors.profession.isEmpty {
+                        Text(entry.safeDailyQuote.authors.profession)
                             .font(WidgetStyles.Typography.Medium.professionFont)
                             .foregroundColor(WidgetStyles.Colors.tertiaryText)
                     }
@@ -326,7 +328,7 @@ struct QuotedWidgetMediumView: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
         .containerBackground(for: .widget) {
-            WidgetStyles.backgroundGradient(for: entry.dailyQuote)
+            WidgetStyles.backgroundGradient(for: entry.safeDailyQuote)
         }
     }
 }
@@ -398,7 +400,7 @@ struct QuotedWidgetLargeView: View {
                     .foregroundColor(WidgetStyles.Colors.secondaryText)
                 
                 // Quote text
-                Text(entry.dailyQuote.quoteText)
+                Text(entry.safeDailyQuote.quoteText)
                     .font(WidgetStyles.Typography.Large.quoteFont)
                     .foregroundColor(WidgetStyles.Colors.primaryText)
                     .multilineTextAlignment(.center)
@@ -410,12 +412,12 @@ struct QuotedWidgetLargeView: View {
             
             // Author section
             VStack(spacing: WidgetStyles.Layout.Spacing.medium) {
-                Text("\(WidgetStyles.Labels.authorPrefix)\(entry.dailyQuote.authors.name)")
+                Text("\(WidgetStyles.Labels.authorPrefix)\(entry.safeDailyQuote.authors.name)")
                     .font(WidgetStyles.Typography.Large.authorFont)
                     .foregroundColor(WidgetStyles.Colors.primaryText)
                 
-                if !entry.dailyQuote.authors.profession.isEmpty {
-                    Text(entry.dailyQuote.authors.profession)
+                if !entry.safeDailyQuote.authors.profession.isEmpty {
+                    Text(entry.safeDailyQuote.authors.profession)
                         .font(WidgetStyles.Typography.Large.professionFont)
                         .foregroundColor(WidgetStyles.Colors.secondaryText)
                 }
@@ -424,7 +426,7 @@ struct QuotedWidgetLargeView: View {
         .padding(WidgetStyles.Layout.largeWidgetPadding)
         .clipShape(RoundedRectangle(cornerRadius: WidgetStyles.Layout.widgetCornerRadius))
         .containerBackground(for: .widget) {
-            WidgetStyles.backgroundGradient(for: entry.dailyQuote)
+            WidgetStyles.backgroundGradient(for: entry.safeDailyQuote)
         }
     }
 }
@@ -453,7 +455,7 @@ struct QuotedWidget: Widget {
     let kind: String = "QuotedWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: QuotedWidgetProvider()) { entry in
+        AppIntentConfiguration(kind: kind, intent: NextQuoteIntent.self, provider: QuotedWidgetProvider()) { entry in
             QuotedWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Daily Quote")
@@ -461,9 +463,6 @@ struct QuotedWidget: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
-
-// MARK: - Extensions
-// Color extension is now in Shared/Extensions/Color+Extensions.swift
 
 // MARK: - Preview
 #if DEBUG
@@ -495,7 +494,7 @@ struct QuotedWidget_Previews: PreviewProvider {
                     createdAt: Date()
                 )
             ),
-            isAuthenticated: false
+            isAuthenticated: true
         )
         
         Group {

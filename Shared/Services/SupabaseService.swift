@@ -178,13 +178,24 @@ class SupabaseManager: ObservableObject {
     
     /// Save authentication state to shared UserDefaults for widget access
     private func saveSharedAuthState(userId: String) {
+        print("🔵 [SupabaseManager] saveSharedAuthState called with userId: \(userId)")
+        print("🔍 [SupabaseManager] App Group: \(appGroup)")
+        print("🔍 [SupabaseManager] SharedUserDefaults available: \(sharedUserDefaults != nil)")
+        
         sharedUserDefaults?.set(true, forKey: "isAuthenticated")
         sharedUserDefaults?.set(userId, forKey: "currentUserId")
+        
+        // Verify the save worked
+        let savedAuth = sharedUserDefaults?.bool(forKey: "isAuthenticated") ?? false
+        let savedUserId = sharedUserDefaults?.string(forKey: "currentUserId")
+        print("🔍 [SupabaseManager] Verification - savedAuth: \(savedAuth), savedUserId: \(savedUserId ?? "nil")")
+        
         print("🟢 [SupabaseManager] Saved shared auth state for user: \(userId)")
     }
     
     /// Clear authentication state from shared UserDefaults
     private func clearSharedAuthState() {
+        print("🔵 [SupabaseManager] clearSharedAuthState called")
         sharedUserDefaults?.removeObject(forKey: "isAuthenticated")
         sharedUserDefaults?.removeObject(forKey: "currentUserId")
         print("🟢 [SupabaseManager] Cleared shared auth state")
@@ -192,12 +203,21 @@ class SupabaseManager: ObservableObject {
     
     /// Check if user is authenticated (for widget use)
     func isUserAuthenticated() -> Bool {
-        return sharedUserDefaults?.bool(forKey: "isAuthenticated") ?? false
+        print("🔵 [SupabaseManager] isUserAuthenticated called")
+        print("🔍 [SupabaseManager] App Group: \(appGroup)")
+        print("🔍 [SupabaseManager] SharedUserDefaults available: \(sharedUserDefaults != nil)")
+        
+        let isAuth = sharedUserDefaults?.bool(forKey: "isAuthenticated") ?? false
+        print("🔍 [SupabaseManager] Retrieved isAuthenticated: \(isAuth)")
+        return isAuth
     }
     
     /// Get current user ID from shared state (for widget use)
     func getSharedUserId() -> String? {
-        return sharedUserDefaults?.string(forKey: "currentUserId")
+        print("🔵 [SupabaseManager] getSharedUserId called")
+        let userId = sharedUserDefaults?.string(forKey: "currentUserId")
+        print("🔍 [SupabaseManager] Retrieved userId: \(userId ?? "nil")")
+        return userId
     }
     
     // MARK: - User Daily Quote Management (ONLY 2 FUNCTIONS)
