@@ -104,11 +104,8 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				Info.plist,
-				Intents/NextQuoteIntent.swift,
 				QuotedWidget.swift,
 				QuotedWidgetBundle.swift,
-				QuotedWidgetControl.swift,
-				QuotedWidgetLiveActivity.swift,
 				WidgetStyles.swift,
 			);
 			target = 21D570532E0CDDA400D3C33D /* Quoted */;
@@ -116,11 +113,8 @@
 		21D570E12E0CE70700D3C33D /* Exceptions for "QuotedWidget" folder in "QuotedWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Intents/NextQuoteIntent.swift,
 				QuotedWidget.swift,
 				QuotedWidgetBundle.swift,
-				QuotedWidgetControl.swift,
-				QuotedWidgetLiveActivity.swift,
 				WidgetStyles.swift,
 			);
 			target = 21D570652E0CDDF200D3C33D /* QuotedWidgetExtension */;

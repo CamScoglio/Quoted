@@ -12,7 +12,5 @@ import SwiftUI
 struct QuotedWidgetBundle: WidgetBundle {
     var body: some Widget {
         QuotedWidget()
-        QuotedWidgetControl()
-        QuotedWidgetLiveActivity()
     }
 }

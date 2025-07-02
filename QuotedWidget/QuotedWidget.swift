@@ -7,12 +7,10 @@
 
 import WidgetKit
 import SwiftUI
-import Intents
-import AppIntents
 import Supabase
 
 // MARK: - Widget Timeline Provider
-struct QuotedWidgetProvider: AppIntentTimelineProvider {
+struct QuotedWidgetProvider: TimelineProvider {
     
     func placeholder(in context: Context) -> QuotedWidgetEntry {
         QuotedWidgetEntry(
@@ -45,11 +43,12 @@ struct QuotedWidgetProvider: AppIntentTimelineProvider {
         )
     }
     
-    func snapshot(for configuration: NextQuoteIntent, in context: Context) async -> QuotedWidgetEntry {
+    func getSnapshot(in context: Context, completion: @escaping (QuotedWidgetEntry) -> ()) {
         print("🔵 [Widget Snapshot] Starting snapshot generation")
         
         if context.isPreview {
-            return placeholder(in: context)
+            completion(placeholder(in: context))
+            return
         }
         
         // Check auth using shared UserDefaults
@@ -58,38 +57,42 @@ struct QuotedWidgetProvider: AppIntentTimelineProvider {
         
         guard isAuth else {
             print("🔴 [Widget Snapshot] User not authenticated")
-            return QuotedWidgetEntry(
+            completion(QuotedWidgetEntry(
                 date: Date(),
                 dailyQuote: nil,
                 isAuthenticated: false
-            )
+            ))
+            return
         }
         
         print("🟢 [Widget Snapshot] User authenticated - getting daily quote")
-        do {
-            let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
-            print("🟢 [Widget Snapshot] Got daily quote: \(dailyQuote?.quoteText ?? "nil")")
-            return QuotedWidgetEntry(
-                date: Date(),
-                dailyQuote: dailyQuote,
-                isAuthenticated: true
-            )
-        } catch {
-            print("🔴 [Widget Snapshot] Error: \(error)")
-            return QuotedWidgetEntry(
-                date: Date(),
-                dailyQuote: nil,
-                isAuthenticated: true
-            )
+        Task {
+            do {
+                let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
+                print("🟢 [Widget Snapshot] Got daily quote: \(dailyQuote?.quoteText ?? "nil")")
+                completion(QuotedWidgetEntry(
+                    date: Date(),
+                    dailyQuote: dailyQuote,
+                    isAuthenticated: true
+                ))
+            } catch {
+                print("🔴 [Widget Snapshot] Error: \(error)")
+                completion(QuotedWidgetEntry(
+                    date: Date(),
+                    dailyQuote: nil,
+                    isAuthenticated: true
+                ))
+            }
         }
     }
 
-    func timeline(for configuration: NextQuoteIntent, in context: Context) async -> Timeline<QuotedWidgetEntry> {
+    func getTimeline(in context: Context, completion: @escaping (Timeline<QuotedWidgetEntry>) -> ()) {
         print("🔵 [Widget Timeline] Starting timeline generation")
         
         if context.isPreview {
             let entry = placeholder(in: context)
-            return Timeline(entries: [entry], policy: .never)
+            completion(Timeline(entries: [entry], policy: .never))
+            return
         }
         
         // Check auth using shared UserDefaults
@@ -105,7 +108,8 @@ struct QuotedWidgetProvider: AppIntentTimelineProvider {
                 dailyQuote: nil,
                 isAuthenticated: false
             )
-            return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
+            completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60))))
+            return
         }
         
         print("🟢 [Widget Timeline] User authenticated")
@@ -130,28 +134,31 @@ struct QuotedWidgetProvider: AppIntentTimelineProvider {
             let entry = QuotedWidgetEntry(date: Date(), dailyQuote: cachedQuote, isAuthenticated: true)
             let tomorrow = Calendar.current.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
             print("🟢 [Widget Timeline] Timeline set to refresh at: \(tomorrow)")
-            return Timeline(entries: [entry], policy: .after(tomorrow))
+            completion(Timeline(entries: [entry], policy: .after(tomorrow)))
+            return
         }
         
         // If no cached quote, try to get from database (this may fail due to RLS)
-        do {
-            let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
-            print("🟢 [Widget Timeline] Successfully got quote from DB: \(dailyQuote?.quoteText ?? "nil")")
-            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote, isAuthenticated: true)
-            let tomorrow = Calendar.current.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
-            print("🟢 [Widget Timeline] Timeline set to refresh at: \(tomorrow)")
-            return Timeline(entries: [entry], policy: .after(tomorrow))
-        } catch {
-            print("🔴 [Widget Timeline] Error getting quote from DB: \(error)")
-            print("🟡 [Widget Timeline] Requesting app to fetch new quote")
-            
-            // Request the main app to fetch data
-            sharedDefaults?.set(true, forKey: "widgetNeedsData")
-            SupabaseService.shared.triggerSync()
-            
-            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: nil, isAuthenticated: true)
-            // Retry more frequently when we need data
-            return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5 * 60)))
+        Task {
+            do {
+                let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
+                print("🟢 [Widget Timeline] Successfully got quote from DB: \(dailyQuote?.quoteText ?? "nil")")
+                let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote, isAuthenticated: true)
+                let tomorrow = Calendar.current.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
+                print("🟢 [Widget Timeline] Timeline set to refresh at: \(tomorrow)")
+                completion(Timeline(entries: [entry], policy: .after(tomorrow)))
+            } catch {
+                print("🔴 [Widget Timeline] Error getting quote from DB: \(error)")
+                print("🟡 [Widget Timeline] Requesting app to fetch new quote")
+                
+                // Request the main app to fetch data
+                sharedDefaults?.set(true, forKey: "widgetNeedsData")
+                SupabaseService.shared.triggerSync()
+                
+                let entry = QuotedWidgetEntry(date: Date(), dailyQuote: nil, isAuthenticated: true)
+                // Retry more frequently when we need data
+                completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5 * 60))))
+            }
         }
     }
 }
@@ -204,49 +211,10 @@ struct QuotedWidgetSmallView: View {
     
     var body: some View {
         VStack(spacing: WidgetStyles.Layout.Spacing.medium) {
-            // Next button (only show for authenticated users)
-            HStack {
-                Spacer()
-                if entry.isAuthenticated {
-                    Button(intent: NextQuoteIntent()) {
-                        HStack(spacing: WidgetStyles.Layout.Spacing.small) {
-                            Text(WidgetStyles.Labels.nextButtonText)
-                                .font(WidgetStyles.Typography.Small.buttonFont)
-                                .fontWeight(WidgetStyles.Typography.Small.buttonFontWeight)
-                            Image(systemName: WidgetStyles.IconNames.nextArrow)
-                                .font(WidgetStyles.Typography.Icons.buttonIcon)
-                        }
-                        .foregroundColor(WidgetStyles.Colors.buttonText)
-                        .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
-                        .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
-                        .background(
-                            RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
-                                .fill(WidgetStyles.Colors.buttonBackground)
-                        )
-                    }
-                } else {
-                    // Show disabled button for unauthenticated users
-                    HStack(spacing: WidgetStyles.Layout.Spacing.small) {
-                        Text("Sign In")
-                            .font(WidgetStyles.Typography.Small.buttonFont)
-                            .fontWeight(WidgetStyles.Typography.Small.buttonFontWeight)
-                        Image(systemName: "person.fill")
-                            .font(WidgetStyles.Typography.Icons.buttonIcon)
-                    }
-                    .foregroundColor(WidgetStyles.Colors.buttonText.opacity(0.6))
-                    .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
-                    .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
-                    .background(
-                        RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
-                            .fill(WidgetStyles.Colors.buttonBackground.opacity(0.6))
-                    )
-                }
-            }
-            
             // Quote icon
             Image(systemName: entry.isAuthenticated ? WidgetStyles.IconNames.quote : "person.fill")
                 .font(WidgetStyles.Typography.Icons.smallQuoteIcon)
-                .foregroundColor(WidgetStyles.Colors.buttonText)
+                .foregroundColor(WidgetStyles.Colors.secondaryText)
             
             // Truncated quote text
             Text(WidgetStyles.truncatedQuote(entry.safeDailyQuote.quoteText))
@@ -280,43 +248,8 @@ struct QuotedWidgetMediumView: View {
     var body: some View {
         HStack(spacing: WidgetStyles.Layout.Spacing.extraLarge) {
             VStack(alignment: .leading, spacing: WidgetStyles.Layout.Spacing.large) {
-                // Next button
+                // Header with quote icon
                 HStack {
-                    if entry.isAuthenticated {
-                        Button(intent: NextQuoteIntent()) {
-                            HStack(spacing: WidgetStyles.Layout.Spacing.small) {
-                                Text(WidgetStyles.Labels.nextButtonText)
-                                    .font(WidgetStyles.Typography.Medium.buttonFont)
-                                    .fontWeight(WidgetStyles.Typography.Medium.buttonFontWeight)
-                                Image(systemName: WidgetStyles.IconNames.nextArrow)
-                                    .font(WidgetStyles.Typography.Icons.buttonIcon)
-                            }
-                            .foregroundColor(WidgetStyles.Colors.buttonText)
-                            .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
-                            .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
-                            .background(
-                                RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
-                                    .fill(WidgetStyles.Colors.buttonBackground)
-                            )
-                        }
-                    } else {
-                        // Show sign-in prompt for unauthenticated users
-                        HStack(spacing: WidgetStyles.Layout.Spacing.small) {
-                            Text("Sign In to App")
-                                .font(WidgetStyles.Typography.Medium.buttonFont)
-                                .fontWeight(WidgetStyles.Typography.Medium.buttonFontWeight)
-                            Image(systemName: "person.fill")
-                                .font(WidgetStyles.Typography.Icons.buttonIcon)
-                        }
-                        .foregroundColor(WidgetStyles.Colors.buttonText.opacity(0.6))
-                        .padding(.horizontal, WidgetStyles.Layout.Button.horizontalPadding)
-                        .padding(.vertical, WidgetStyles.Layout.Button.verticalPadding)
-                        .background(
-                            RoundedRectangle(cornerRadius: WidgetStyles.Layout.buttonCornerRadius)
-                                .fill(WidgetStyles.Colors.buttonBackground.opacity(0.6))
-                        )
-                    }
-                    
                     Spacer()
                     
                     Image(systemName: entry.isAuthenticated ? WidgetStyles.IconNames.quote : "person.fill")
@@ -378,42 +311,6 @@ struct QuotedWidgetLargeView: View {
                 }
                 
                 Spacer()
-                
-                // Next button (only for authenticated users)
-                if entry.isAuthenticated {
-                    Button(intent: NextQuoteIntent()) {
-                        HStack(spacing: WidgetStyles.Layout.Spacing.small + 2) {
-                            Text(WidgetStyles.Labels.nextButtonText)
-                                .font(WidgetStyles.Typography.Large.buttonFont)
-                                .fontWeight(WidgetStyles.Typography.Large.buttonFontWeight)
-                            Image(systemName: WidgetStyles.IconNames.nextArrow)
-                                .font(WidgetStyles.Typography.Icons.buttonIcon)
-                        }
-                        .foregroundColor(WidgetStyles.Colors.buttonText)
-                        .padding(.horizontal, WidgetStyles.Layout.Button.largeHorizontalPadding)
-                        .padding(.vertical, WidgetStyles.Layout.Button.largeVerticalPadding)
-                        .background(
-                            RoundedRectangle(cornerRadius: WidgetStyles.Layout.largeButtonCornerRadius)
-                                .fill(WidgetStyles.Colors.buttonBackground)
-                        )
-                    }
-                } else {
-                    // Show sign-in button for unauthenticated users
-                    HStack(spacing: WidgetStyles.Layout.Spacing.small + 2) {
-                        Text("Sign In")
-                            .font(WidgetStyles.Typography.Large.buttonFont)
-                            .fontWeight(WidgetStyles.Typography.Large.buttonFontWeight)
-                        Image(systemName: "person.fill")
-                            .font(WidgetStyles.Typography.Icons.buttonIcon)
-                    }
-                    .foregroundColor(WidgetStyles.Colors.buttonText.opacity(0.6))
-                    .padding(.horizontal, WidgetStyles.Layout.Button.largeHorizontalPadding)
-                    .padding(.vertical, WidgetStyles.Layout.Button.largeVerticalPadding)
-                    .background(
-                        RoundedRectangle(cornerRadius: WidgetStyles.Layout.largeButtonCornerRadius)
-                            .fill(WidgetStyles.Colors.buttonBackground.opacity(0.6))
-                    )
-                }
             }
             
             Spacer()
@@ -482,7 +379,7 @@ struct QuotedWidget: Widget {
     let kind: String = "QuotedWidget"
     
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: NextQuoteIntent.self, provider: QuotedWidgetProvider()) { entry in
+        StaticConfiguration(kind: kind, provider: QuotedWidgetProvider()) { entry in
             QuotedWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Daily Quote")

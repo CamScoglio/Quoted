@@ -9,28 +9,20 @@ import SwiftUI
  
  🎨 COLORS:
     • Colors.primaryText        → Main quote text color
-    • Colors.buttonBackground   → "Next" button background
     • Colors.fallbackGradient*  → Default gradient when quote has none
  
  ✍️ FONTS:
     • Typography.*.quoteFont    → Quote text size/style
     • Typography.*.authorFont   → Author name size/style
-    • Typography.*.buttonFont   → Button text size/style
  
  📐 LAYOUT:
     • Layout.*WidgetPadding     → Space between widget edge and content
     • Layout.Spacing.*          → Gaps between elements
     • Layout.*CornerRadius      → How rounded corners are
  
- 🎯 POSITIONING:
-    • Layout.Button.*Padding    → Space inside buttons
-    • TextLimits.*LineLimit     → How many lines of text to show
-    • Gradient.startPoint/endPoint → Gradient direction
- 
  🏷️ TEXT & ICONS:
-    • Labels.nextButtonText     → Button text ("Next", "→", etc.)
+    • Labels.authorPrefix       → Text before author ("— " or "by ")
     • IconNames.quote          → Quote bubble icon
-    • IconNames.nextArrow      → Button arrow icon
  
  ═══════════════════════════════════════════════════════════════════════════════
  
@@ -39,7 +31,7 @@ import SwiftUI
  • Change gradient colors in the preview sample data
  • Test with different quote lengths using the editable entries
  • Font options: .caption, .caption2, .footnote, .body, .title3, etc.
- • Icon options: SF Symbols (quote.opening, chevron.right, star.fill, etc.)
+ • Icon options: SF Symbols (quote.opening, star.fill, etc.)
  
  ═══════════════════════════════════════════════════════════════════════════════
 */
@@ -49,17 +41,15 @@ import SwiftUI
 struct WidgetStyles {
     
     // MARK: - Colors 🎨
-    // ✏️ EDIT THESE TO CHANGE TEXT AND BUTTON COLORS
+    // ✏️ EDIT THESE TO CHANGE TEXT COLORS
     struct Colors {
         // 📝 TEXT COLORS - Changes the color of all text elements
         static let primaryText = Color.white           // 🔸 Main quote text color
         static let secondaryText = Color.white.opacity(0.8)    // 🔸 Author name color  
         static let tertiaryText = Color.white.opacity(0.7)     // 🔸 Headers & category text color
         static let quaternaryText = Color.white.opacity(0.6)   // 🔸 Date text color
-        static let buttonText = Color.white.opacity(0.9)       // 🔸 "Next" button text color
         
-        // 📝 BACKGROUND COLORS - Changes button and fallback colors
-        static let buttonBackground = Color.white.opacity(0.2) // 🔸 "Next" button background color
+        // 📝 BACKGROUND COLORS - Changes fallback colors
         static let fallbackGradientStart = Color.blue          // 🔸 Backup gradient start (if quote has no gradient)
         static let fallbackGradientEnd = Color.purple          // 🔸 Backup gradient end (if quote has no gradient)
     }
@@ -74,8 +64,6 @@ struct WidgetStyles {
             static let quoteFontWeight = Font.Weight.medium        // 🔸 Quote text boldness
             static let authorFont = Font.caption2                  // 🔸 Author name font size  
             static let authorFontWeight = Font.Weight.semibold     // 🔸 Author name boldness
-            static let buttonFont = Font.caption2                  // 🔸 "Next" button font size
-            static let buttonFontWeight = Font.Weight.semibold     // 🔸 "Next" button boldness
         }
         
         // 📱 MEDIUM WIDGET FONTS - Changes text appearance in medium widgets
@@ -84,8 +72,6 @@ struct WidgetStyles {
             static let authorFont = Font.caption                   // 🔸 Author name font size
             static let authorFontWeight = Font.Weight.semibold     // 🔸 Author name boldness
             static let professionFont = Font.caption2              // 🔸 Author profession font size
-            static let buttonFont = Font.caption2                  // 🔸 "Next" button font size
-            static let buttonFontWeight = Font.Weight.semibold     // 🔸 "Next" button boldness
         }
         
         // 📱 LARGE WIDGET FONTS - Changes text appearance in large widgets
@@ -96,16 +82,13 @@ struct WidgetStyles {
             static let quoteFont = Font.system(size: 16, weight: .medium, design: .rounded)  // 🔸 Quote text font (size, weight, style)
             static let authorFont = Font.system(size: 15, weight: .semibold)                 // 🔸 Author name font (size, weight)
             static let professionFont = Font.caption               // 🔸 Author profession font size
-            static let buttonFont = Font.caption2                  // 🔸 "Next" button font size
-            static let buttonFontWeight = Font.Weight.semibold     // 🔸 "Next" button boldness
         }
         
-        // 🎯 ICON SIZES - Changes the size of quote icons and button arrows
+        // 🎯 ICON SIZES - Changes the size of quote icons
         struct Icons {
             static let smallQuoteIcon = Font.title2                // 🔸 Quote bubble icon size (small widget)
             static let mediumQuoteIcon = Font.title3               // 🔸 Quote bubble icon size (medium widget)
             static let largeQuoteIcon = Font.largeTitle            // 🔸 Quote bubble icon size (large widget)
-            static let buttonIcon = Font.caption2                  // 🔸 Arrow icon size in "Next" button
         }
     }
     
@@ -120,24 +103,14 @@ struct WidgetStyles {
         
         // 🔄 CORNER RADIUS - Controls how rounded the corners are
         static let widgetCornerRadius: CGFloat = 16     // 🔸 Widget corner roundness
-        static let buttonCornerRadius: CGFloat = 0      // 🔸 Small/medium button corner roundness
-        static let largeButtonCornerRadius: CGFloat = 10 // 🔸 Large button corner roundness
         
-        // 📏 SPACING BETWEEN ELEMENTS - Controls gaps between text, buttons, etc.
+        // 📏 SPACING BETWEEN ELEMENTS - Controls gaps between text, icons, etc.
         struct Spacing {
-            static let small: CGFloat = 4               // 🔸 Tiny gaps (between button text & icon)
+            static let small: CGFloat = 4               // 🔸 Tiny gaps
             static let medium: CGFloat = 8              // 🔸 Small gaps (between author & profession)
             static let large: CGFloat = 12              // 🔸 Medium gaps (between quote & author)
             static let extraLarge: CGFloat = 16         // 🔸 Large gaps (between major sections)
             static let huge: CGFloat = 20               // 🔸 Huge gaps (large widget sections)
-        }
-        
-        // 🔘 BUTTON PADDING - Controls space inside the "Next" button
-        struct Button {
-            static let horizontalPadding: CGFloat = 0   // 🔸 Left/right space inside small/medium buttons
-            static let verticalPadding: CGFloat = 0     // 🔸 Top/bottom space inside small/medium buttons
-            static let largeHorizontalPadding: CGFloat = 0  // 🔸 Left/right space inside large buttons
-            static let largeVerticalPadding: CGFloat = 0    // 🔸 Top/bottom space inside large buttons
         }
     }
     
@@ -157,7 +130,6 @@ struct WidgetStyles {
     // ✏️ EDIT THESE TO CHANGE WHICH ICONS ARE USED
     struct IconNames {
         static let quote = "quote.bubble.fill"          // 🔸 Quote bubble icon (try: "quote.opening", "text.quote")
-        static let nextArrow = "arrow.right"            // 🔸 Next button arrow (try: "chevron.right", "arrow.forward")
     }
     
     // MARK: - Gradient Configuration 🌈
@@ -168,10 +140,9 @@ struct WidgetStyles {
     }
     
     // MARK: - Text Labels 🏷️
-    // ✏️ EDIT THESE TO CHANGE BUTTON TEXT AND HEADERS
+    // ✏️ EDIT THESE TO CHANGE HEADERS AND TEXT
     struct Labels {
         static let dailyQuoteHeader = "DAILY QUOTE"     // 🔸 Header text in large widget
-        static let nextButtonText = "Next"              // 🔸 Button text (try: "→", "New", "More")
         static let authorPrefix = "— "                  // 🔸 Text before author name (try: "by ", "~ ", "")
     }
     
@@ -239,11 +210,6 @@ struct WidgetStylesPreviews: PreviewProvider {
                     ColorSwatch(color: WidgetStyles.Colors.primaryText, name: "Primary")
                     ColorSwatch(color: WidgetStyles.Colors.secondaryText, name: "Secondary")
                     ColorSwatch(color: WidgetStyles.Colors.tertiaryText, name: "Tertiary")
-                }
-                
-                HStack {
-                    ColorSwatch(color: WidgetStyles.Colors.buttonBackground, name: "Button BG")
-                    ColorSwatch(color: WidgetStyles.Colors.buttonText, name: "Button Text")
                 }
             }
             .padding()
@@ -374,7 +340,7 @@ struct LiveWidgetPreviews: PreviewProvider {
                 categories: Category(
                     id: UUID(),
                     name: "Motivation",
-                    icon: "star.fill",
+                    icon: "lightbulb.fill",
                     themeColor: "#667eea",
                     createdAt: Date()
                 )
@@ -483,8 +449,8 @@ struct LiveStyleEditor: PreviewProvider {
                 authorId: UUID(),
                 categoryId: UUID(),
                 designTheme: "minimal",
-                // 🎨 EDIT THESE GRADIENT COLORS (hex format):
-                backgroundGradient: ["start": "#ff9a9e", "end": "#fecfef"],
+                // 🎨 EDIT THESE GRADIENT COLORS:
+                backgroundGradient: ["start": "#ff7e5f", "end": "#feb47b"],
                 isFeatured: true,
                 createdAt: Date(),
                 authors: Author(
@@ -501,7 +467,7 @@ struct LiveStyleEditor: PreviewProvider {
                     // 📝 EDIT CATEGORY:
                     name: "Life",
                     icon: "heart.fill",
-                    themeColor: "#ff9a9e",
+                    themeColor: "#ff7e5f",
                     createdAt: Date()
                 )
             ),
@@ -551,7 +517,7 @@ struct LiveStyleEditor: PreviewProvider {
             dailyQuote: DailyQuote(
                 id: UUID(),
                 // 📝 EDIT THIS QUOTE TEXT:
-                quoteText: "The only impossible journey is the one you never begin. Every expert was once a beginner, and every pro was once an amateur.",
+                quoteText: "The future belongs to those who believe in the beauty of their dreams and are willing to pursue them with unwavering determination.",
                 authorId: UUID(),
                 categoryId: UUID(),
                 designTheme: "minimal",
@@ -562,17 +528,17 @@ struct LiveStyleEditor: PreviewProvider {
                 authors: Author(
                     id: UUID(),
                     // 📝 EDIT AUTHOR NAME:
-                    name: "Tony Robbins",
+                    name: "Eleanor Roosevelt",
                     // 📝 EDIT PROFESSION:
-                    profession: "Motivational Speaker",
+                    profession: "Former First Lady & Activist",
                     bio: nil,
                     imageUrl: nil
                 ),
                 categories: Category(
                     id: UUID(),
                     // 📝 EDIT CATEGORY:
-                    name: "Growth",
-                    icon: "arrow.up.circle.fill",
+                    name: "Dreams & Aspirations",
+                    icon: "star.fill",
                     themeColor: "#ffecd2",
                     createdAt: Date()
                 )
@@ -583,42 +549,33 @@ struct LiveStyleEditor: PreviewProvider {
 }
 
 /*
- ⚡ QUICK REFERENCE - MOST COMMON DESIGN CHANGES ⚡
+ 🎨 QUICK STYLE CHANGES EXAMPLES 🎨
  
  🎨 CHANGE COLORS:
  ┌─────────────────────────────────────────────────────────────┐
- │ Colors.primaryText = Color.black                            │  ← Quote text color
- │ Colors.buttonBackground = Color.blue.opacity(0.3)          │  ← Button background
- │ Colors.fallbackGradientStart = Color.red                   │  ← Default gradient start
- │ Colors.fallbackGradientEnd = Color.orange                  │  ← Default gradient end
+ │ Colors.primaryText = Color.black                           │  ← Dark text instead of white
+ │ Colors.fallbackGradientStart = Color.red                  │  ← Red gradient start
+ │ Colors.fallbackGradientEnd = Color.orange                 │  ← Orange gradient end
  └─────────────────────────────────────────────────────────────┘
  
- ✍️ CHANGE FONT SIZES:
+ ✍️ CHANGE FONTS:
  ┌─────────────────────────────────────────────────────────────┐
- │ Typography.Large.quoteFont = Font.system(size: 18)         │  ← Large widget quote size
- │ Typography.Medium.quoteFont = Font.system(size: 16)        │  ← Medium widget quote size
- │ Typography.Small.quoteFont = Font.body                     │  ← Small widget quote size
+ │ Typography.Large.quoteFont = Font.title                   │  ← Bigger quote text
+ │ Typography.Small.authorFont = Font.body                   │  ← Bigger author text  
+ │ Typography.Medium.quoteFont = Font.callout                │  ← Different medium size
  └─────────────────────────────────────────────────────────────┘
  
- 📐 CHANGE SPACING:
+ 📐 CHANGE LAYOUT:
  ┌─────────────────────────────────────────────────────────────┐
- │ Layout.largeWidgetPadding = 30                             │  ← More space around content
- │ Layout.Spacing.large = 20                                  │  ← Bigger gaps between elements
+ │ Layout.smallWidgetPadding = 20                             │  ← More padding
+ │ Layout.Spacing.large = 20                                  │  ← Bigger gaps
  │ Layout.widgetCornerRadius = 20                             │  ← More rounded corners
  └─────────────────────────────────────────────────────────────┘
  
  🏷️ CHANGE TEXT & ICONS:
  ┌─────────────────────────────────────────────────────────────┐
- │ Labels.nextButtonText = "→"                                │  ← Arrow instead of "Next"
  │ Labels.authorPrefix = "by "                                │  ← "by Author" instead of "— Author"
  │ IconNames.quote = "quote.opening"                          │  ← Different quote icon
- │ IconNames.nextArrow = "chevron.right"                      │  ← Different arrow icon
- └─────────────────────────────────────────────────────────────┘
- 
- 🎯 CHANGE BUTTON POSITION (in widget views):
- ┌─────────────────────────────────────────────────────────────┐
- │ Move "Button(intent: NextQuoteIntent())" to different      │  ← Reposition the Next button
- │ location in the VStack/HStack structure                    │  
  └─────────────────────────────────────────────────────────────┘
  
  */

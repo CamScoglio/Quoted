@@ -199,23 +199,6 @@ struct ContentView: View {
                 await loadDailyQuote()
             }
             
-            // Check if widget requested a new quote (high priority - check more frequently)
-            if sharedDefaults?.bool(forKey: "widgetRequestsNewQuote") == true {
-                let timestamp = sharedDefaults?.double(forKey: "widgetRequestTimestamp") ?? 0
-                print("🔄 [ContentView] ✅ Widget requested new quote at \(timestamp) - generating new quote")
-                sharedDefaults?.set(false, forKey: "widgetRequestsNewQuote")
-                
-                // CRITICAL: Ensure flag changes are written to disk
-                sharedDefaults?.synchronize()
-                
-                await loadNewQuote()
-                
-                // Force widget reload after processing the request
-                print("🔄 [ContentView] 🚀 Forcing widget reload after processing widget request")
-                WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
-                print("🔄 [ContentView] ✅ Widget reload command sent")
-            }
-            
             // Check if widget needs data
             if sharedDefaults?.bool(forKey: "widgetNeedsData") == true {
                 print("🔄 [ContentView] ✅ Widget needs data - ensuring quote is available")
@@ -238,8 +221,8 @@ struct ContentView: View {
                 WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
             }
             
-            // Check more frequently for widget requests (every 0.5 seconds)
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            // Check every 2 seconds for sync needs
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
         }
         
         print("🔄 [ContentView] Sync polling stopped")

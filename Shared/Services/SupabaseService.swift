@@ -27,20 +27,40 @@ class SupabaseService: ObservableObject {
     
     // App Group for sharing data between app and widget
     private let appGroup = "group.com.Scoglio.Quoted"
-    private var sharedUserDefaults: UserDefaults? {
-        UserDefaults(suiteName: appGroup)
-    }
+    private let sharedUserDefaults: UserDefaults?
     
     init() {
-        guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
-              let config = NSDictionary(contentsOfFile: path),
-              let urlString = config["SUPABASE_URL"] as? String,
-              let key = config["SUPABASE_ANON_KEY"] as? String,
-              let url = URL(string: urlString) else {
+        // Initialize sharedUserDefaults first
+        self.sharedUserDefaults = UserDefaults(suiteName: appGroup)
+        
+        // Try to load config from main bundle first, then from shared container
+        var urlString: String?
+        var key: String?
+        
+        // Try main bundle first
+        if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+           let config = NSDictionary(contentsOfFile: path) {
+            urlString = config["SUPABASE_URL"] as? String
+            key = config["SUPABASE_ANON_KEY"] as? String
+        }
+        
+        // If not found, try shared container
+        if urlString == nil || key == nil {
+            urlString = sharedUserDefaults?.string(forKey: "SUPABASE_URL")
+            key = sharedUserDefaults?.string(forKey: "SUPABASE_ANON_KEY")
+        }
+        
+        guard let url = URL(string: urlString ?? ""),
+              let key = key else {
             fatalError("Could not load Supabase configuration")
         }
         
         self.client = SupabaseClient(supabaseURL: url, supabaseKey: key)
+        
+        // Try to restore session from shared storage
+        Task {
+            await restoreSession()
+        }
     }
     
     // MARK: - Phone Authentication Methods
@@ -56,7 +76,7 @@ class SupabaseService: ObservableObject {
             print("🟢 ✅ [SupabaseService] OTP sent successfully via Supabase")
             return true
         } catch {
-            print("�� ❌ [SupabaseService] Failed to send OTP: \(error)")
+            print("🟢 ❌ [SupabaseService] Failed to send OTP: \(error)")
             print("🟢 ❌ [SupabaseService] Error details: \(error.localizedDescription)")
             return false
         }
@@ -84,8 +104,21 @@ class SupabaseService: ObservableObject {
             print("🟢 [SupabaseService] User ID: \(response.user.id)")
             print("🟢 [SupabaseService] Session created: \(response.session != nil)")
             
+            // Save session to shared storage
+            if let session = response.session {
+                saveSession(session)
+            }
+            
             // Save authentication state for widget access
             saveSharedAuthState(userId: response.user.id.uuidString)
+            
+            // Save Supabase config to shared storage
+            if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+               let config = NSDictionary(contentsOfFile: path) {
+                sharedUserDefaults?.set(config["SUPABASE_URL"] as? String, forKey: "SUPABASE_URL")
+                sharedUserDefaults?.set(config["SUPABASE_ANON_KEY"] as? String, forKey: "SUPABASE_ANON_KEY")
+                sharedUserDefaults?.synchronize()
+            }
             
             // Update user profile with email data
             let profileSuccess = await updateUserProfile(
@@ -143,6 +176,32 @@ class SupabaseService: ObservableObject {
     
     // MARK: - Session Management
     
+    /// Save session to shared storage
+    private func saveSession(_ session: Session) {
+        guard let sessionData = try? JSONEncoder().encode(session) else { return }
+        sharedUserDefaults?.set(sessionData, forKey: "supabaseSession")
+        sharedUserDefaults?.synchronize()
+        print("🔐 [SupabaseService] Session saved to shared storage")
+    }
+    
+    /// Restore session from shared storage
+    private func restoreSession() async {
+        guard let sessionData = sharedUserDefaults?.data(forKey: "supabaseSession"),
+              let session = try? JSONDecoder().decode(Session.self, from: sessionData) else {
+            return
+        }
+        
+        do {
+            try await client.auth.setSession(
+                accessToken: session.accessToken,
+                refreshToken: session.refreshToken
+            )
+            print("🔐 [SupabaseService] Session restored from shared storage")
+        } catch {
+            print("🟢 [SupabaseService] Failed to restore session: \(error)")
+        }
+    }
+    
     /// Get current authenticated user
     /// - Returns: Current user session or nil if not authenticated
     func getCurrentUser() async -> User? {
@@ -161,6 +220,9 @@ class SupabaseService: ObservableObject {
         do {
             try await client.auth.signOut()
             clearSharedAuthState()
+            // Clear session from shared storage
+            sharedUserDefaults?.removeObject(forKey: "supabaseSession")
+            sharedUserDefaults?.synchronize()
             print("🟢 ✅ [SupabaseService] User signed out successfully")
             return true
         } catch {
