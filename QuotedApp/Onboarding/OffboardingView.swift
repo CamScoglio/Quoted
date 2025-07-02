@@ -13,67 +13,53 @@ struct OffboardingView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 50) {
+            VStack(spacing: AppLayout.spacingXLarge) {
                 Spacer()
                 
-                // Success animation/icon
-                VStack(spacing: 30) {
-                    // Success checkmark
-                    ZStack {
-                        Circle()
-                            .fill(Color.green.opacity(0.1))
-                            .frame(width: 120, height: 120)
-                        
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 60))
-                            .foregroundColor(.green)
-                    }
+                // Success animation/icon with modern styling
+                VStack(spacing: AppLayout.spacingLarge) {
+                    // Success checkmark with modern gradient
+                    SuccessCheckmark()
                     
-                    // Success message
-                    VStack(spacing: 16) {
+                    // Success message with clean text (no card)
+                    VStack(spacing: AppLayout.spacingMedium) {
                         Text("You're all set!")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
+                            .font(AppFonts.largeTitle)
+                            .foregroundColor(AppColors.primaryText)
                         
                         Text("Welcome to Quoted! Get ready to discover daily inspiration through beautiful, curated quotes.")
-                            .font(.body)
-                            .foregroundColor(.secondary)
+                            .font(AppFonts.body)
+                            .foregroundColor(AppColors.secondaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(nil)
                     }
-                    .padding(.horizontal, 32)
+                    .cleanTextSection()
                 }
                 
                 Spacer()
                 
-                // Get started button
-                VStack(spacing: 16) {
-                    Button(action: {
+                // Get started button with modern styling
+                VStack(spacing: AppLayout.spacingMedium) {
+                    Button {
                         print("🟢 [OffboardingView] Get Started button tapped")
                         navigateToMainApp = true
-                    }) {
+                    } label: {
                         HStack {
                             Text("Get Started")
                             Image(systemName: "arrow.right")
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .fontWeight(.semibold)
                     }
-                    .padding(.horizontal, 32)
+                    .primaryButton()
                     
-                    // Optional subtitle
+                    // Optional subtitle with modern typography
                     Text("Start exploring your daily quotes")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(AppFonts.subheadline)
+                        .foregroundColor(AppColors.secondaryText)
                 }
+                .padding(.horizontal, AppLayout.paddingLarge)
                 .padding(.bottom, 50)
             }
-            .background(Color(UIColor.systemGroupedBackground))
+            .modernBackground()
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToMainApp) {
                 ContentView()

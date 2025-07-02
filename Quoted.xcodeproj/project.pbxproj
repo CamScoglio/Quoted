@@ -24,6 +24,9 @@
 		217502B42E10CC43007BBB58 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502952E10CC43007BBB58 /* Color+Extensions.swift */; };
 		217502BF2E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
 		217502C02E10D06F007BBB58 /* Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217502BE2E10D06C007BBB58 /* Notes.swift */; };
+		219877EA2E15C1EF003DB662 /* Assets 2.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 219877E92E15C1EF003DB662 /* Assets 2.xcassets */; };
+		219877EB2E15C1EF003DB662 /* Assets 2.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 219877E92E15C1EF003DB662 /* Assets 2.xcassets */; };
+		219877ED2E15C392003DB662 /* AppStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219877EC2E15C392003DB662 /* AppStyles.swift */; };
 		21CAB2252E12135E008E5EB8 /* AppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2242E12135E008E5EB8 /* AppView.swift */; };
 		21CAB2282E12138A008E5EB8 /* TwilioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2272E12138A008E5EB8 /* TwilioManager.swift */; };
 		21CAB2292E12138A008E5EB8 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21CAB2262E12138A008E5EB8 /* StorageManager.swift */; };
@@ -81,6 +84,8 @@
 		217502A02E10CC43007BBB58 /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		217502BE2E10D06C007BBB58 /* Notes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notes.swift; sourceTree = "<group>"; };
 		2198776E2E147756003DB662 /* QuotedWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuotedWidgetExtension.entitlements; sourceTree = "<group>"; };
+		219877E92E15C1EF003DB662 /* Assets 2.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Assets 2.xcassets"; sourceTree = "<group>"; };
+		219877EC2E15C392003DB662 /* AppStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStyles.swift; sourceTree = "<group>"; };
 		21CAB2242E12135E008E5EB8 /* AppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppView.swift; sourceTree = "<group>"; };
 		21CAB2262E12138A008E5EB8 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
 		21CAB2272E12138A008E5EB8 /* TwilioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwilioManager.swift; sourceTree = "<group>"; };
@@ -164,6 +169,7 @@
 		2175021F2E10C955007BBB58 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				219877EC2E15C392003DB662 /* AppStyles.swift */,
 				21CAB2242E12135E008E5EB8 /* AppView.swift */,
 				2175021E2E10C955007BBB58 /* QuotedApp.swift */,
 			);
@@ -270,6 +276,7 @@
 		21D5704B2E0CDDA400D3C33D = {
 			isa = PBXGroup;
 			children = (
+				219877E92E15C1EF003DB662 /* Assets 2.xcassets */,
 				2198776E2E147756003DB662 /* QuotedWidgetExtension.entitlements */,
 				21CAB23E2E121464008E5EB8 /* Config.plist */,
 				217502BE2E10D06C007BBB58 /* Notes.swift */,
@@ -399,6 +406,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				219877EA2E15C1EF003DB662 /* Assets 2.xcassets in Resources */,
 				21CAB23F2E121464008E5EB8 /* Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -407,6 +415,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				219877EB2E15C1EF003DB662 /* Assets 2.xcassets in Resources */,
 				21CAB2402E121464008E5EB8 /* Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -429,6 +438,7 @@
 				217502A52E10CC43007BBB58 /* DailyQuote.swift in Sources */,
 				21CAB22A2E12138A008E5EB8 /* TwilioManager.swift in Sources */,
 				21CAB22B2E12138A008E5EB8 /* StorageManager.swift in Sources */,
+				219877ED2E15C392003DB662 /* AppStyles.swift in Sources */,
 				21CAB2252E12135E008E5EB8 /* AppView.swift in Sources */,
 				217502A72E10CC43007BBB58 /* Quote.swift in Sources */,
 				217502A82E10CC43007BBB58 /* Author.swift in Sources */,
@@ -594,7 +604,7 @@
 				CODE_SIGN_ENTITLEMENTS = QuotedApp/Quoted.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = G3TQNYN8A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
@@ -624,7 +634,7 @@
 				CODE_SIGN_ENTITLEMENTS = QuotedApp/Quoted.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = G3TQNYN8A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
@@ -654,7 +664,7 @@
 				CODE_SIGN_ENTITLEMENTS = QuotedWidget/QuotedWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = G3TQNYN8A2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QuotedWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = QuotedWidget;
@@ -682,7 +692,7 @@
 				CODE_SIGN_ENTITLEMENTS = QuotedWidget/QuotedWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = G3TQNYN8A2;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QuotedWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = QuotedWidget;

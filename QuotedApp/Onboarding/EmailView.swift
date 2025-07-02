@@ -18,32 +18,62 @@ struct EmailView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Text("Enter your email")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+            VStack(spacing: AppLayout.spacingXLarge) {
+                Spacer()
                 
-                TextField("Email", text: $email)
-                    .textFieldStyle(.roundedBorder)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
-                    .onChange(of: email) { _, newValue in
-                        print("🟡 [EmailView] Email input changed: '\(newValue)'")
+                // Title section with clean text (no card)
+                VStack(spacing: AppLayout.spacingMedium) {
+                    Text("Enter your email")
+                        .font(AppFonts.largeTitle)
+                        .foregroundColor(AppColors.primaryText)
+                        .multilineTextAlignment(.center)
+                    
+                    Text("We'll use this to keep your account secure")
+                        .font(AppFonts.body)
+                        .foregroundColor(AppColors.secondaryText)
+                        .multilineTextAlignment(.center)
+                }
+                .cleanTextSection()
+                
+                // Email input field
+                VStack(alignment: .leading, spacing: AppLayout.spacingSmall) {
+                    Text("Email Address")
+                        .font(AppFonts.headline)
+                        .foregroundColor(AppColors.primaryText)
+                    
+                    TextField("Enter your email", text: $email)
+                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                        .modernTextField()
+                        .onChange(of: email) { _, newValue in
+                            print("🟡 [EmailView] Email input changed: '\(newValue)'")
+                        }
+                }
+                .padding(.horizontal, AppLayout.paddingLarge)
+                
+                Spacer()
+                
+                // Continue button
+                VStack(spacing: AppLayout.spacingMedium) {
+                    Button {
+                        print("🟡 [EmailView] Continue button tapped with email: '\(email)'")
+                        saveEmailAndContinue()
+                    } label: {
+                        HStack {
+                            if isLoading {
+                                ModernProgressView()
+                            }
+                            Text(isLoading ? "Processing..." : "Continue")
+                        }
                     }
-                
-                Button("Continue") {
-                    print("🟡 [EmailView] Continue button tapped with email: '\(email)'")
-                    saveEmailAndContinue()
+                    .primaryButton(isEnabled: !email.isEmpty && !isLoading)
+                    .disabled(email.isEmpty || isLoading)
                 }
-                .disabled(email.isEmpty || isLoading)
-                .buttonStyle(.borderedProminent)
-                
-                if isLoading {
-                    ProgressView()
-                }
+                .padding(.horizontal, AppLayout.paddingLarge)
+                .padding(.bottom, 50)
             }
-            .padding()
+            .modernBackground()
             .navigationDestination(isPresented: $navigateToPhone) {
                 EnterPhoneView(email: email)
             }

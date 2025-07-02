@@ -24,62 +24,54 @@ struct AuthPhoneView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Top section with back button
+                // Top section with modern back button
                 HStack {
-                    Button(action: {
+                    ModernBackButton {
                         print("🔴 [AuthPhoneView] Back button tapped")
                         dismiss()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(.title2)
-                            .foregroundColor(.primary)
                     }
                     
                     Spacer()
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, AppLayout.paddingMedium)
                 .padding(.top, 10)
                 
                 // Main content area
-                VStack(spacing: 40) {
+                VStack(spacing: AppLayout.spacingXLarge) {
                     Spacer()
                     
-                    // Title section
-                    VStack(spacing: 16) {
+                    // Title section with clean text (no card)
+                    VStack(spacing: AppLayout.spacingMedium) {
                         Text("Enter verification code")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+                            .font(AppFonts.largeTitle)
+                            .foregroundColor(AppColors.primaryText)
                             .multilineTextAlignment(.center)
                         
-                        Text("We sent a 6-digit code to")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        Text(phoneNumber)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(.primary)
+                        VStack(spacing: AppLayout.spacingSmall) {
+                            Text("We sent a 6-digit code to")
+                                .font(AppFonts.body)
+                                .foregroundColor(AppColors.secondaryText)
+                            
+                            Text(phoneNumber)
+                                .font(AppFonts.body)
+                                .fontWeight(.medium)
+                                .foregroundColor(AppColors.accentText)
+                        }
                     }
-                    .padding(.horizontal, 32)
+                    .cleanTextSection()
                     
-                    // 6-digit code input
-                    VStack(alignment: .leading, spacing: 8) {
+                    // 6-digit code input with modern styling
+                    VStack(alignment: .leading, spacing: AppLayout.spacingSmall) {
                         Text("Verification Code")
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                            .font(AppFonts.headline)
+                            .foregroundColor(AppColors.primaryText)
                         
                         TextField("000000", text: $verificationCode)
                             .keyboardType(.numberPad)
                             .textContentType(.oneTimeCode)
                             .multilineTextAlignment(.center)
                             .font(.title2)
-                            .padding()
-                            .background(Color(UIColor.secondarySystemBackground))
-                            .cornerRadius(10)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color(UIColor.separator), lineWidth: 1)
-                            )
+                            .modernTextField()
                             .onChange(of: verificationCode) { _, newValue in
                                 // Limit to 6 digits
                                 let filtered = newValue.filter { $0.isNumber }
@@ -88,47 +80,40 @@ struct AuthPhoneView: View {
                                 verificationCode = limited
                             }
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, AppLayout.paddingLarge)
                     
                     Spacer()
                     Spacer()
                 }
                 
-                // Bottom buttons
-                VStack(spacing: 16) {
-                    Button(action: {
+                // Bottom buttons with modern styling
+                VStack(spacing: AppLayout.spacingMedium) {
+                    Button {
                         print("🔴 [AuthPhoneView] Verify Code button tapped")
                         print("🔴 [AuthPhoneView] Current code: '\(verificationCode)' (length: \(verificationCode.count))")
                         verifyCode()
-                    }) {
+                    } label: {
                         HStack {
                             if isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .scaleEffect(0.8)
+                                ModernProgressView()
                             }
                             Text(isLoading ? "Verifying..." : "Verify Code")
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(verificationCode.count == 6 ? Color.blue : Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .animation(.easeInOut(duration: 0.2), value: isLoading)
                     }
+                    .primaryButton(isEnabled: verificationCode.count == 6 && !isLoading)
                     .disabled(verificationCode.count != 6 || isLoading)
                     
                     Button(isResending ? "Sending..." : "Didn't receive code? Resend") {
                         print("🔴 [AuthPhoneView] Resend code button tapped")
                         resendVerificationCode()
                     }
-                    .font(.subheadline)
-                    .foregroundColor(isResending ? .gray : .blue)
+                    .secondaryButton()
                     .disabled(isResending)
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, AppLayout.paddingLarge)
                 .padding(.bottom, 50)
             }
+            .modernBackground()
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToOffboarding) {
                 OffboardingView()

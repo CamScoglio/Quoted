@@ -20,39 +20,41 @@ struct StartingView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 40) {
+            VStack(spacing: AppLayout.spacingXLarge) {
                 Spacer()
                 
-                // App branding section
-                VStack(spacing: 20) {
-                    Image(systemName: "quote.bubble.fill")
-                        .font(.system(size: 80))
-                        .foregroundColor(.blue)
+                // App branding section with clean text (no card)
+                VStack(spacing: AppLayout.spacingLarge) {
+                    AppIconView()
                     
-                    Text("Welcome to Quoted")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
-                    
-                    Text("Discover daily inspiration through curated quotes")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
+                    VStack(spacing: AppLayout.spacingMedium) {
+                        Text("Welcome to Quoted")
+                            .font(AppFonts.largeTitle)
+                            .foregroundColor(AppColors.primaryText)
+                            .multilineTextAlignment(.center)
+                        
+                        Text("Discover daily inspiration through curated quotes")
+                            .font(AppFonts.title2)
+                            .foregroundColor(AppColors.secondaryText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .cleanTextSection()
                 }
-                .padding(.horizontal, 32)
                 
                 Spacer()
                 
-                // Continue button at bottom
-                Button("Continue") {
+                // Continue button with modern styling
+                Button {
                     print("🔵 [StartingView] Continue button tapped")
                     navigateToEmail = true
+                } label: {
+                    Text("Continue")
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding(.horizontal, 32)
+                .primaryButton()
+                .padding(.horizontal, AppLayout.paddingLarge)
                 .padding(.bottom, 50)
             }
+            .modernBackground()
             .navigationDestination(isPresented: $navigateToEmail) {
                 EmailView()
             }

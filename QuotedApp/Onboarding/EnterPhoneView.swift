@@ -23,50 +23,46 @@ struct EnterPhoneView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Top section with back button and title
+                // Top section with modern back button
                 HStack {
-                    Button(action: {
+                    ModernBackButton {
                         print("🟠 [EnterPhoneView] Back button tapped")
                         dismiss()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .font(.title2)
-                            .foregroundColor(.primary)
                     }
                     
                     Spacer()
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, AppLayout.paddingMedium)
                 .padding(.top, 10)
                 
                 // Main content area
-                VStack(spacing: 40) {
+                VStack(spacing: AppLayout.spacingXLarge) {
                     Spacer()
                     
-                    // Title section - centered toward top
-                    VStack(spacing: 16) {
+                    // Title section waith clean text (no card)
+                    VStack(spacing: AppLayout.spacingMedium) {
                         Text("Enter your phone number")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
+                            .font(AppFonts.largeTitle)
+                            .foregroundColor(AppColors.primaryText)
                             .multilineTextAlignment(.center)
                         
                         Text("We'll send you a verification code")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .font(AppFonts.body)
+                            .foregroundColor(AppColors.secondaryText)
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.horizontal, 32)
+                    .cleanTextSection()
                     
-                    // Phone number input field - modern styling
-                    VStack(alignment: .leading, spacing: 8) {
+                    // Phone number input field with modern styling
+                    VStack(alignment: .leading, spacing: AppLayout.spacingSmall) {
                         Text("Phone Number")
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                            .font(AppFonts.headline)
+                            .foregroundColor(AppColors.primaryText)
                         
                         HStack {
                             Text("+1")
-                                .font(.body)
-                                .foregroundColor(.secondary)
+                                .font(AppFonts.body)
+                                .foregroundColor(AppColors.secondaryText)
                                 .padding(.leading, 12)
                             
                             TextField("(555) 123-4567", text: $phoneNumber)
@@ -78,71 +74,57 @@ struct EnterPhoneView: View {
                                     phoneNumber = formatted
                                 }
                         }
-                        .padding(.vertical, 12)
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(10)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color(UIColor.separator), lineWidth: 1)
-                        )
+                        .modernTextField()
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, AppLayout.paddingLarge)
                     
                     Spacer()
                     Spacer()
                 }
                 
                 // Bottom section with agreement and button
-                VStack(spacing: 16) {
-                    // SMS Agreement Checkbox
-                    HStack(alignment: .top, spacing: 12) {
+                VStack(spacing: AppLayout.spacingMedium) {
+                    // SMS Agreement Checkbox with modern styling
+                    HStack(alignment: .top, spacing: AppLayout.spacingSmall) {
                         Button(action: {
                             agreedToSMS.toggle()
                             print("🟠 [EnterPhoneView] SMS agreement toggled: \(agreedToSMS)")
                         }) {
                             Image(systemName: agreedToSMS ? "checkmark.square.fill" : "square")
                                 .font(.title3)
-                                .foregroundColor(agreedToSMS ? .blue : .secondary)
+                                .foregroundColor(agreedToSMS ? AppColors.accentText : AppColors.secondaryText)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 0) {
-                                Text("I authorize Quoted to send a text (SMS/MMS) message containing a verification code to the mobile phone number I have provided. I understand that message and data rates may apply, that this message is transactional and not marketing in nature, and that I may revoke my consent at any time prior to completion of the verification process by closing the application or contacting support")
-                                    .font(.caption)
-                                    .foregroundColor(.primary)
-                            }
+                            Text("I authorize Quoted to send a text (SMS/MMS) message containing a verification code to the mobile phone number I have provided. I understand that message and data rates may apply, that this message is transactional and not marketing in nature, and that I may revoke my consent at any time prior to completion of the verification process by closing the application or contacting support")
+                                .font(AppFonts.caption)
+                                .foregroundColor(AppColors.primaryText)
                         }
                         
                         Spacer()
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, AppLayout.paddingLarge)
                     
-                    // Verification Button
-                    Button(action: {
+                    // Verification Button with modern styling
+                    Button {
                         print("🟠 [EnterPhoneView] Send Verification Code button tapped")
                         print("🟠 [EnterPhoneView] Current phone number: '\(phoneNumber)'")
                         sendVerificationCode()
-                    }) {
+                    } label: {
                         HStack {
                             if isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .scaleEffect(0.8)
+                                ModernProgressView()
                             }
                             Text(isLoading ? "Sending..." : "Send Verification Code")
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background((phoneNumber.isEmpty || !agreedToSMS) ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .animation(.easeInOut(duration: 0.2), value: isLoading)
                     }
+                    .primaryButton(isEnabled: !phoneNumber.isEmpty && agreedToSMS && !isLoading)
                     .disabled(phoneNumber.isEmpty || !agreedToSMS || isLoading)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, AppLayout.paddingLarge)
                     .padding(.bottom, 50)
                 }
             }
+            .modernBackground()
             .navigationBarHidden(true)
             .navigationDestination(isPresented: $navigateToAuth) {
                 AuthPhoneView(phoneNumber: phoneNumber, email: email)
