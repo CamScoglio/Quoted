@@ -13,7 +13,6 @@ import Supabase
 
 // MARK: - Widget Timeline Provider
 struct QuotedWidgetProvider: AppIntentTimelineProvider {
-    private let supabase = SupabaseManager.shared
     
     func placeholder(in context: Context) -> QuotedWidgetEntry {
         QuotedWidgetEntry(
@@ -48,14 +47,17 @@ struct QuotedWidgetProvider: AppIntentTimelineProvider {
     
     func snapshot(for configuration: NextQuoteIntent, in context: Context) async -> QuotedWidgetEntry {
         print("🔵 [Widget Snapshot] Starting snapshot generation")
-        print("🔍 [Widget Snapshot] Context preview: \(context.isPreview)")
         
         if context.isPreview {
             return placeholder(in: context)
         }
         
-        guard supabase.isUserAuthenticated() else {
-            print("🔴 [Widget Snapshot] User not authenticated - returning unauthenticated entry")
+        // Check auth using shared UserDefaults
+        let sharedDefaults = UserDefaults(suiteName: "group.com.Scoglio.Quoted")
+        let isAuth = sharedDefaults?.bool(forKey: "isAuthenticated") ?? false
+        
+        guard isAuth else {
+            print("🔴 [Widget Snapshot] User not authenticated")
             return QuotedWidgetEntry(
                 date: Date(),
                 dailyQuote: nil,
@@ -63,24 +65,20 @@ struct QuotedWidgetProvider: AppIntentTimelineProvider {
             )
         }
         
-        print("🟢 [Widget Snapshot] User authenticated - attempting to get daily quote")
-        // Try to get the user's daily quote
+        print("🟢 [Widget Snapshot] User authenticated - getting daily quote")
         do {
-            let dailyQuote = try await supabase.getUserDailyQuote()
-            print("🟢 [Widget Snapshot] Successfully got daily quote: \(dailyQuote?.quoteText ?? "nil")")
+            let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
+            print("🟢 [Widget Snapshot] Got daily quote: \(dailyQuote?.quoteText ?? "nil")")
             return QuotedWidgetEntry(
                 date: Date(),
                 dailyQuote: dailyQuote,
                 isAuthenticated: true
             )
         } catch {
-            print("🔴 [Widget Snapshot] Error getting daily quote: \(error)")
-            print("🔴 [Widget Snapshot] Error details: \(error.localizedDescription)")
-            // Return placeholder on error but keep authenticated state
-            let placeholder = placeholder(in: context)
+            print("🔴 [Widget Snapshot] Error: \(error)")
             return QuotedWidgetEntry(
                 date: Date(),
-                dailyQuote: placeholder.dailyQuote,
+                dailyQuote: nil,
                 isAuthenticated: true
             )
         }
@@ -88,46 +86,72 @@ struct QuotedWidgetProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: NextQuoteIntent, in context: Context) async -> Timeline<QuotedWidgetEntry> {
         print("🔵 [Widget Timeline] Starting timeline generation")
-        print("🔍 [Widget Timeline] Context family: \(context.family)")
-        print("🔍 [Widget Timeline] Context preview: \(context.isPreview)")
-        
-        var entries: [QuotedWidgetEntry] = []
-        let currentDate = Date()
         
         if context.isPreview {
             let entry = placeholder(in: context)
             return Timeline(entries: [entry], policy: .never)
         }
         
-        // Debug authentication state
-        let isAuth = supabase.isUserAuthenticated()
-        let userId = supabase.getSharedUserId()
-        print("🔍 [Widget Timeline] Authentication check - isAuth: \(isAuth), userId: \(userId ?? "nil")")
+        // Check auth using shared UserDefaults
+        let sharedDefaults = UserDefaults(suiteName: "group.com.Scoglio.Quoted")
+        let isAuth = sharedDefaults?.bool(forKey: "isAuthenticated") ?? false
+        let userId = sharedDefaults?.string(forKey: "currentUserId")
+        print("🔍 [Widget Timeline] Auth check - isAuth: \(isAuth), userId: \(userId ?? "nil")")
         
-        // Check authentication using shared state
-        guard supabase.isUserAuthenticated() else {
-            print("🔴 [Widget Timeline] User not authenticated - showing sign-in prompt")
+        guard isAuth else {
+            print("🔴 [Widget Timeline] User not authenticated")
             let entry = QuotedWidgetEntry(
-                date: currentDate,
+                date: Date(),
                 dailyQuote: nil,
                 isAuthenticated: false
             )
-            print("🔴 [Widget Timeline] Returning unauthenticated timeline")
             return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
         }
         
         print("🟢 [Widget Timeline] User authenticated")
         
-        do {
-            let dailyQuote = try await supabase.getUserDailyQuote()
-            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote, isAuthenticated: true)
-            // Update once per day at midnight
+        // First try to get quote from shared storage (fast path)
+        if let cachedQuote = SupabaseService.shared.getQuoteFromSharedStorage() {
+            print("🟢 [Widget Timeline] Using cached quote: \(cachedQuote.quoteText)")
+            print("🔍 [Widget Timeline] Quote ID: \(cachedQuote.id), Author: \(cachedQuote.authors.name)")
+            
+            // Debug: Check shared UserDefaults directly
+            let lastUpdated = sharedDefaults?.double(forKey: "quoteLastUpdated") ?? 0
+            let lastUpdatedDate = Date(timeIntervalSince1970: lastUpdated)
+            print("🔍 [Widget Timeline] Last updated timestamp: \(lastUpdated) (\(lastUpdatedDate))")
+            
+            // Debug: Check raw shared storage data
+            if let rawData = sharedDefaults?.data(forKey: "currentDailyQuote") {
+                print("🔍 [Widget Timeline] Raw shared data exists, size: \(rawData.count) bytes")
+            } else {
+                print("🔴 [Widget Timeline] No raw shared data found!")
+            }
+            
+            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: cachedQuote, isAuthenticated: true)
             let tomorrow = Calendar.current.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
+            print("🟢 [Widget Timeline] Timeline set to refresh at: \(tomorrow)")
+            return Timeline(entries: [entry], policy: .after(tomorrow))
+        }
+        
+        // If no cached quote, try to get from database (this may fail due to RLS)
+        do {
+            let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
+            print("🟢 [Widget Timeline] Successfully got quote from DB: \(dailyQuote?.quoteText ?? "nil")")
+            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: dailyQuote, isAuthenticated: true)
+            let tomorrow = Calendar.current.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
+            print("🟢 [Widget Timeline] Timeline set to refresh at: \(tomorrow)")
             return Timeline(entries: [entry], policy: .after(tomorrow))
         } catch {
+            print("🔴 [Widget Timeline] Error getting quote from DB: \(error)")
+            print("🟡 [Widget Timeline] Requesting app to fetch new quote")
+            
+            // Request the main app to fetch data
+            sharedDefaults?.set(true, forKey: "widgetNeedsData")
+            SupabaseService.shared.triggerSync()
+            
             let entry = QuotedWidgetEntry(date: Date(), dailyQuote: nil, isAuthenticated: true)
-            // Retry in 30 minutes if there was an error
-            return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(30 * 60)))
+            // Retry more frequently when we need data
+            return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5 * 60)))
         }
     }
 }
@@ -246,6 +270,7 @@ struct QuotedWidgetSmallView: View {
         .containerBackground(for: .widget) {
             WidgetStyles.backgroundGradient(for: entry.safeDailyQuote)
         }
+        .id(entry.dailyQuote?.id ?? UUID())
     }
 }
 
@@ -330,6 +355,7 @@ struct QuotedWidgetMediumView: View {
         .containerBackground(for: .widget) {
             WidgetStyles.backgroundGradient(for: entry.safeDailyQuote)
         }
+        .id(entry.dailyQuote?.id ?? UUID())
     }
 }
 
@@ -428,6 +454,7 @@ struct QuotedWidgetLargeView: View {
         .containerBackground(for: .widget) {
             WidgetStyles.backgroundGradient(for: entry.safeDailyQuote)
         }
+        .id(entry.dailyQuote?.id ?? UUID())
     }
 }
 

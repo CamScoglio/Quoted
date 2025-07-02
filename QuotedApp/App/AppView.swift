@@ -21,7 +21,7 @@ struct AppView: View {
       }
     }
     .task {
-      for await state in SupabaseManager.shared.client.auth.authStateChanges {
+      for await state in SupabaseService.shared.client.auth.authStateChanges {
         if [.initialSession, .signedIn, .signedOut].contains(state.event) {
           let wasAuthenticated = isAuthenticated
           isAuthenticated = state.session != nil

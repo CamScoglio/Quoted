@@ -173,7 +173,7 @@ struct AuthPhoneView: View {
             
             // Use Supabase phone authentication instead of separate Twilio calls
             print("🔴 [AuthPhoneView] Calling SupabaseManager.verifyPhoneOTP...")
-            let success = await SupabaseManager.shared.verifyPhoneOTP(e164Number, code: verificationCode, email: email)
+            let success = await SupabaseService.shared.verifyPhoneOTP(e164Number, code: verificationCode, email: email)
             
             print("🔴 [AuthPhoneView] SupabaseManager.verifyPhoneOTP result: \(success)")
             
@@ -182,7 +182,7 @@ struct AuthPhoneView: View {
                 
                 // Create user_daily_quotes row immediately after successful authentication
                 do {
-                    _ = try await SupabaseManager.shared.assignRandomQuoteToUser()
+                    _ = try await SupabaseService.shared.assignRandomQuoteToUser()
                     print("🔴 ✅ [AuthPhoneView] user_daily_quotes row created for new user")
                 } catch {
                     print("🔴 ❌ [AuthPhoneView] Failed to create user_daily_quotes row: \(error)")
@@ -217,7 +217,7 @@ struct AuthPhoneView: View {
             
             // Use SupabaseManager to resend OTP instead of TwilioManager
             print("🔴 [AuthPhoneView] Calling SupabaseManager.sendPhoneOTP...")
-            let success = await SupabaseManager.shared.sendPhoneOTP(e164Number)
+            let success = await SupabaseService.shared.sendPhoneOTP(e164Number)
             
             print("🔴 [AuthPhoneView] SupabaseManager.sendPhoneOTP result: \(success)")
             

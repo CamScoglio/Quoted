@@ -186,7 +186,7 @@ struct EnterPhoneView: View {
             
             // Use Supabase phone authentication instead of direct Twilio API
             print("🟠 [EnterPhoneView] Calling SupabaseManager.sendPhoneOTP...")
-            let success = await SupabaseManager.shared.sendPhoneOTP(e164Number)
+            let success = await SupabaseService.shared.sendPhoneOTP(e164Number)
             
             print("🟠 [EnterPhoneView] SupabaseManager.sendPhoneOTP result: \(success)")
             

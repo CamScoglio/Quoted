@@ -13,7 +13,7 @@ import UIKit
 class StorageManager: ObservableObject {
     
     // MARK: - Supabase Client
-    private let supabase = SupabaseManager.shared.client
+    private let supabase = SupabaseService.shared.client
     
     // MARK: - Constants
     private let bucketName = "profile-images"

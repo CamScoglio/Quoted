@@ -20,8 +20,8 @@ struct UserProfile: Codable {
     }
 }
 
-class SupabaseManager: ObservableObject {
-    static let shared = SupabaseManager()
+class SupabaseService: ObservableObject {
+    static let shared = SupabaseService()
     
     let client: SupabaseClient
     
@@ -31,7 +31,7 @@ class SupabaseManager: ObservableObject {
         UserDefaults(suiteName: appGroup)
     }
     
-    private init() {
+    init() {
         guard let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
               let config = NSDictionary(contentsOfFile: path),
               let urlString = config["SUPABASE_URL"] as? String,
@@ -49,15 +49,15 @@ class SupabaseManager: ObservableObject {
     /// - Parameter phoneNumber: E.164 formatted phone number (e.g., "+19842021329")
     /// - Returns: True if SMS sent successfully, false otherwise
     func sendPhoneOTP(_ phoneNumber: String) async -> Bool {
-        print("🟢 [SupabaseManager] Sending OTP to phone: \(phoneNumber)")
+        print("🟢 [SupabaseService] Sending OTP to phone: \(phoneNumber)")
         
         do {
             try await client.auth.signInWithOTP(phone: phoneNumber)
-            print("🟢 ✅ [SupabaseManager] OTP sent successfully via Supabase")
+            print("🟢 ✅ [SupabaseService] OTP sent successfully via Supabase")
             return true
         } catch {
-            print("🟢 ❌ [SupabaseManager] Failed to send OTP: \(error)")
-            print("🟢 ❌ [SupabaseManager] Error details: \(error.localizedDescription)")
+            print("�� ❌ [SupabaseService] Failed to send OTP: \(error)")
+            print("🟢 ❌ [SupabaseService] Error details: \(error.localizedDescription)")
             return false
         }
     }
@@ -69,9 +69,9 @@ class SupabaseManager: ObservableObject {
     ///   - email: User's email address to store in profile
     /// - Returns: True if authentication successful, false otherwise
     func verifyPhoneOTP(_ phoneNumber: String, code: String, email: String) async -> Bool {
-        print("🟢 [SupabaseManager] Verifying OTP for phone: \(phoneNumber)")
-        print("🟢 [SupabaseManager] Code: \(code)")
-        print("🟢 [SupabaseManager] Email for profile: \(email)")
+        print("🟢 [SupabaseService] Verifying OTP for phone: \(phoneNumber)")
+        print("🟢 [SupabaseService] Code: \(code)")
+        print("🟢 [SupabaseService] Email for profile: \(email)")
         
         do {
             let response = try await client.auth.verifyOTP(
@@ -80,9 +80,9 @@ class SupabaseManager: ObservableObject {
                 type: .sms
             )
             
-            print("🟢 ✅ [SupabaseManager] Phone verification successful!")
-            print("🟢 [SupabaseManager] User ID: \(response.user.id)")
-            print("🟢 [SupabaseManager] Session created: \(response.session != nil)")
+            print("🟢 ✅ [SupabaseService] Phone verification successful!")
+            print("🟢 [SupabaseService] User ID: \(response.user.id)")
+            print("🟢 [SupabaseService] Session created: \(response.session != nil)")
             
             // Save authentication state for widget access
             saveSharedAuthState(userId: response.user.id.uuidString)
@@ -94,16 +94,16 @@ class SupabaseManager: ObservableObject {
             )
             
             if profileSuccess {
-                print("🟢 ✅ [SupabaseManager] User profile updated successfully")
+                print("🟢 ✅ [SupabaseService] User profile updated successfully")
                 return true
             } else {
-                print("🟢 ❌ [SupabaseManager] Failed to update user profile")
+                print("🟢 ❌ [SupabaseService] Failed to update user profile")
                 return false
             }
             
         } catch {
-            print("🟢 ❌ [SupabaseManager] Phone verification failed: \(error)")
-            print("🟢 ❌ [SupabaseManager] Error details: \(error.localizedDescription)")
+            print("🟢 ❌ [SupabaseService] Phone verification failed: \(error)")
+            print("🟢 ❌ [SupabaseService] Error details: \(error.localizedDescription)")
             return false
         }
     }
@@ -114,10 +114,10 @@ class SupabaseManager: ObservableObject {
     ///   - email: User's actual email address
     /// - Returns: True if update successful, false otherwise
     private func updateUserProfile(userId: UUID, email: String) async -> Bool {
-        print("🟢 [SupabaseManager] Updating user profile...")
-        print("🟢 [SupabaseManager] User ID: \(userId)")
-        print("🟢 [SupabaseManager] Email: \(email)")
-        print("🟢 [SupabaseManager] Phone number is stored in auth.users automatically")
+        print("🟢 [SupabaseService] Updating user profile...")
+        print("🟢 [SupabaseService] User ID: \(userId)")
+        print("🟢 [SupabaseService] Email: \(email)")
+        print("🟢 [SupabaseService] Phone number is stored in auth.users automatically")
         
         do {
             let userProfile = UserProfile(
@@ -131,12 +131,12 @@ class SupabaseManager: ObservableObject {
                 .upsert(userProfile)
                 .execute()
             
-            print("🟢 ✅ [SupabaseManager] User profile updated successfully")
+            print("🟢 ✅ [SupabaseService] User profile updated successfully")
             return true
             
         } catch {
-            print("🟢 ❌ [SupabaseManager] Failed to update user profile: \(error)")
-            print("🟢 ❌ [SupabaseManager] Error details: \(error.localizedDescription)")
+            print("🟢 ❌ [SupabaseService] Failed to update user profile: \(error)")
+            print("🟢 ❌ [SupabaseService] Error details: \(error.localizedDescription)")
             return false
         }
     }
@@ -148,10 +148,10 @@ class SupabaseManager: ObservableObject {
     func getCurrentUser() async -> User? {
         do {
             let session = try await client.auth.session
-            print("🟢 [SupabaseManager] Current user: \(session.user.id)")
+            print("🟢 [SupabaseService] Current user: \(session.user.id)")
             return session.user
         } catch {
-            print("🟢 [SupabaseManager] No current user: \(error)")
+            print("🟢 [SupabaseService] No current user: \(error)")
             return nil
         }
     }
@@ -161,66 +161,36 @@ class SupabaseManager: ObservableObject {
         do {
             try await client.auth.signOut()
             clearSharedAuthState()
-            print("🟢 ✅ [SupabaseManager] User signed out successfully")
+            print("🟢 ✅ [SupabaseService] User signed out successfully")
             return true
         } catch {
-            print("🟢 ❌ [SupabaseManager] Failed to sign out: \(error)")
+            print("🟢 ❌ [SupabaseService] Failed to sign out: \(error)")
             return false
         }
-    }
-    
-    /// Check if user is currently authenticated
-    var isAuthenticated: Bool {
-        return client.auth.currentUser != nil
     }
     
     // MARK: - Shared Authentication State (for Widget)
     
     /// Save authentication state to shared UserDefaults for widget access
     private func saveSharedAuthState(userId: String) {
-        print("🔵 [SupabaseManager] saveSharedAuthState called with userId: \(userId)")
-        print("🔍 [SupabaseManager] App Group: \(appGroup)")
-        print("🔍 [SupabaseManager] SharedUserDefaults available: \(sharedUserDefaults != nil)")
-        
         sharedUserDefaults?.set(true, forKey: "isAuthenticated")
         sharedUserDefaults?.set(userId, forKey: "currentUserId")
-        
-        // Verify the save worked
-        let savedAuth = sharedUserDefaults?.bool(forKey: "isAuthenticated") ?? false
-        let savedUserId = sharedUserDefaults?.string(forKey: "currentUserId")
-        print("🔍 [SupabaseManager] Verification - savedAuth: \(savedAuth), savedUserId: \(savedUserId ?? "nil")")
-        
-        print("🟢 [SupabaseManager] Saved shared auth state for user: \(userId)")
+        print("🟢 [SupabaseService] Saved shared auth state for user: \(userId)")
     }
     
     /// Clear authentication state from shared UserDefaults
     private func clearSharedAuthState() {
-        print("🔵 [SupabaseManager] clearSharedAuthState called")
         sharedUserDefaults?.removeObject(forKey: "isAuthenticated")
         sharedUserDefaults?.removeObject(forKey: "currentUserId")
-        print("🟢 [SupabaseManager] Cleared shared auth state")
-    }
-    
-    /// Check if user is authenticated (for widget use)
-    func isUserAuthenticated() -> Bool {
-        print("🔵 [SupabaseManager] isUserAuthenticated called")
-        print("🔍 [SupabaseManager] App Group: \(appGroup)")
-        print("🔍 [SupabaseManager] SharedUserDefaults available: \(sharedUserDefaults != nil)")
-        
-        let isAuth = sharedUserDefaults?.bool(forKey: "isAuthenticated") ?? false
-        print("🔍 [SupabaseManager] Retrieved isAuthenticated: \(isAuth)")
-        return isAuth
+        print("🟢 [SupabaseService] Cleared shared auth state")
     }
     
     /// Get current user ID from shared state (for widget use)
     func getSharedUserId() -> String? {
-        print("🔵 [SupabaseManager] getSharedUserId called")
-        let userId = sharedUserDefaults?.string(forKey: "currentUserId")
-        print("🔍 [SupabaseManager] Retrieved userId: \(userId ?? "nil")")
-        return userId
+        return sharedUserDefaults?.string(forKey: "currentUserId")
     }
     
-    // MARK: - User Daily Quote Management (ONLY 2 FUNCTIONS)
+    // MARK: - User Daily Quote Management
     
     /// Get current user ID string
     func getCurrentUserId() async -> String? {
@@ -232,19 +202,21 @@ class SupabaseManager: ObservableObject {
     func assignRandomQuoteToUser() async throws -> DailyQuote {
         print("🟡 [SupabaseService] assignRandomQuoteToUser() called")
         
-        guard let currentUser = await getCurrentUser() else {
+        // Try session first, fall back to shared user ID for widget
+        var userId: String
+        if let currentUser = await getCurrentUser() {
+            userId = currentUser.id.uuidString
+            print("🟡 [SupabaseService] Using session user ID: \(userId)")
+        } else if let sharedUserId = getSharedUserId() {
+            userId = sharedUserId
+            print("🟡 [SupabaseService] Using shared user ID for widget: \(userId)")
+        } else {
             print("🔴 [SupabaseService] No authenticated user found")
             throw QuoteError.userNotAuthenticated
         }
         
-        // Debug: Check different ways to get user ID
-        let userIdFromUser = currentUser.id.uuidString
-        let userIdFromSession = try? await client.auth.session.user.id.uuidString
-        print("🔍 [SupabaseService] User ID from currentUser: \(userIdFromUser)")
-        print("🔍 [SupabaseService] User ID from session: \(userIdFromSession ?? "nil")")
-        
         let today = DateFormatter.yyyyMMdd.string(from: Date())
-        print("🟡 [SupabaseService] Assigning quote for user \(currentUser.id) on \(today)")
+        print("🟡 [SupabaseService] Assigning quote for user \(userId) on \(today)")
         
         // Get random quote with full data
         let countResponse = try await client.from("quotes").select("id", head: true, count: .exact).execute()
@@ -272,7 +244,7 @@ class SupabaseManager: ObservableObject {
         // Use upsert to either update existing row or insert new one
         print("🟡 [SupabaseService] Upserting user's daily quote for today...")
         let upsertData = [
-            "user_id": currentUser.id.uuidString.lowercased(),
+            "user_id": userId.lowercased(),
             "quote_id": randomQuote.id.uuidString.lowercased(),
             "assigned_date": today,
             "is_viewed": "true",
@@ -281,20 +253,43 @@ class SupabaseManager: ObservableObject {
         
         print("🔍 [SupabaseService] Upsert data: \(upsertData)")
         
-        let upsertResult = try await client
-            .from("user_daily_quotes")
-            .upsert(upsertData, onConflict: "user_id,assigned_date")
-            .execute()
-        
-        print("🔍 [SupabaseService] Upsert completed: \(upsertResult.count ?? 0) rows affected")
-        print("🟡 [SupabaseService] ✅ Database upsert completed successfully")
-        print("🟢 [SupabaseService] ✅ Successfully assigned new quote to user!")
-        return randomQuote
+        do {
+            let upsertResult = try await client
+                .from("user_daily_quotes")
+                .upsert(upsertData, onConflict: "user_id,assigned_date")
+                .execute()
+            
+            print("🔍 [SupabaseService] Upsert completed: \(upsertResult.count ?? 0) rows affected")
+            print("🟡 [SupabaseService] ✅ Database upsert completed successfully")
+            print("🟢 [SupabaseService] ✅ Successfully assigned new quote to user!")
+            
+            // Save to shared storage for cross-app sync
+            saveQuoteToSharedStorage(randomQuote)
+            
+            // Trigger sync if this was called from widget
+            if await getCurrentUser() == nil {
+                triggerSync()
+                print("🔄 [Widget] Triggered app sync")
+            }
+            
+            return randomQuote
+        } catch {
+            print("🔴 [SupabaseService] Upsert failed: \(error)")
+            throw QuoteError.databaseError(error.localizedDescription)
+        }
     }
     
     /// Get the current user's daily quote
     func getUserDailyQuote() async throws -> DailyQuote? {
-        guard let currentUser = await getCurrentUser() else {
+        // Try session first, fall back to shared user ID for widget
+        var userId: String
+        if let currentUser = await getCurrentUser() {
+            userId = currentUser.id.uuidString
+            print("🟡 [SupabaseService] Using session user ID: \(userId)")
+        } else if let sharedUserId = getSharedUserId() {
+            userId = sharedUserId
+            print("🟡 [SupabaseService] Using shared user ID for widget: \(userId)")
+        } else {
             throw QuoteError.userNotAuthenticated
         }
         
@@ -305,15 +300,64 @@ class SupabaseManager: ObservableObject {
             let response: [DailyQuote] = try await client
                 .from("quotes")
                 .select("*, authors!inner(*), categories!inner(*), user_daily_quotes!inner(user_id, assigned_date)")
-                .eq("user_daily_quotes.user_id", value: currentUser.id.uuidString.lowercased())
+                .eq("user_daily_quotes.user_id", value: userId.lowercased())
                 .eq("user_daily_quotes.assigned_date", value: today)
                 .execute().value
             
-            return response.first
+            let quote = response.first
+            
+            // Save to shared storage for cross-app sync
+            if let quote = quote {
+                saveQuoteToSharedStorage(quote)
+            }
+            
+            return quote
         } catch {
             print("📝 Error in getUserDailyQuote: \(error)")
             throw QuoteError.databaseError(error.localizedDescription)
         }
+    }
+    
+    // MARK: - Shared Storage & Sync
+    
+    /// Save quote to shared UserDefaults for cross-app sync
+    func saveQuoteToSharedStorage(_ quote: DailyQuote) {
+        guard let data = try? JSONEncoder().encode(quote) else { return }
+        sharedUserDefaults?.set(data, forKey: "currentDailyQuote")
+        sharedUserDefaults?.set(Date().timeIntervalSince1970, forKey: "quoteLastUpdated")
+        
+        // CRITICAL: Force synchronization to disk before widget reload
+        // This prevents the race condition where widget timeline is generated
+        // before UserDefaults data is flushed to disk
+        sharedUserDefaults?.synchronize()
+        
+        print("🔄 [Sync] Quote saved to shared storage: '\(quote.quoteText)' by \(quote.authors.name)")
+        print("🔍 [Sync] Quote ID: \(quote.id)")
+        print("💾 [Sync] UserDefaults synchronized to disk")
+    }
+    
+    /// Get quote from shared UserDefaults
+    func getQuoteFromSharedStorage() -> DailyQuote? {
+        guard let data = sharedUserDefaults?.data(forKey: "currentDailyQuote"),
+              let quote = try? JSONDecoder().decode(DailyQuote.self, from: data) else {
+            return nil
+        }
+        return quote
+    }
+    
+    /// Check if app needs to sync (for polling)
+    func needsSync() -> Bool {
+        let needs = sharedUserDefaults?.bool(forKey: "needsSync") ?? false
+        if needs {
+            // Clear the flag
+            sharedUserDefaults?.set(false, forKey: "needsSync")
+        }
+        return needs
+    }
+    
+    /// Mark that sync is needed
+    func triggerSync() {
+        sharedUserDefaults?.set(true, forKey: "needsSync")
     }
 }
 

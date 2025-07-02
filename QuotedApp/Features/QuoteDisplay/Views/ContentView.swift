@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     
-    private let supabase = SupabaseManager.shared
+    private let supabase = SupabaseService.shared
     
     var body: some View {
         NavigationView {
@@ -97,6 +97,9 @@ struct ContentView: View {
             // Force widget reload when ContentView appears (user is authenticated)
             print("🔄 [ContentView] User authenticated - forcing widget reload")
             WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+            
+            // Start polling for widget updates
+            await startSyncPolling()
         }
     }
     
@@ -169,6 +172,8 @@ struct ContentView: View {
             print("🎲 [ContentView] ✅ UI updated with new quote")
             
             // Also force widget reload after new quote
+            // CRITICAL: Add small delay to ensure UserDefaults sync completed
+            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
             print("🎲 [ContentView] Forcing widget reload after new quote assignment")
             WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
             
@@ -179,6 +184,65 @@ struct ContentView: View {
         
         print("🎲 [ContentView] loadNewQuote() completed, isLoading = false")
         isLoading = false
+    }
+    
+    /// Start polling for widget-triggered updates
+    private func startSyncPolling() async {
+        print("🔄 [ContentView] Starting sync polling...")
+        
+        let sharedDefaults = UserDefaults(suiteName: "group.com.Scoglio.Quoted")
+        
+        while !Task.isCancelled {
+            // Check if widget triggered a general sync
+            if supabase.needsSync() {
+                print("🔄 [ContentView] ✅ General sync needed - reloading quote from database")
+                await loadDailyQuote()
+            }
+            
+            // Check if widget requested a new quote (high priority - check more frequently)
+            if sharedDefaults?.bool(forKey: "widgetRequestsNewQuote") == true {
+                let timestamp = sharedDefaults?.double(forKey: "widgetRequestTimestamp") ?? 0
+                print("🔄 [ContentView] ✅ Widget requested new quote at \(timestamp) - generating new quote")
+                sharedDefaults?.set(false, forKey: "widgetRequestsNewQuote")
+                
+                // CRITICAL: Ensure flag changes are written to disk
+                sharedDefaults?.synchronize()
+                
+                await loadNewQuote()
+                
+                // Force widget reload after processing the request
+                print("🔄 [ContentView] 🚀 Forcing widget reload after processing widget request")
+                WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+                print("🔄 [ContentView] ✅ Widget reload command sent")
+            }
+            
+            // Check if widget needs data
+            if sharedDefaults?.bool(forKey: "widgetNeedsData") == true {
+                print("🔄 [ContentView] ✅ Widget needs data - ensuring quote is available")
+                sharedDefaults?.set(false, forKey: "widgetNeedsData")
+                
+                if currentQuote == nil {
+                    await loadDailyQuote()
+                } else {
+                    // Just refresh the shared storage with current quote
+                    if let quote = currentQuote {
+                        supabase.saveQuoteToSharedStorage(quote)
+                        print("🔄 [ContentView] Refreshed shared storage with current quote")
+                    }
+                }
+                
+                // CRITICAL: Ensure data changes are written to disk before widget reload
+                sharedDefaults?.synchronize()
+                
+                // Force widget reload after providing data
+                WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+            }
+            
+            // Check more frequently for widget requests (every 0.5 seconds)
+            try? await Task.sleep(nanoseconds: 500_000_000)
+        }
+        
+        print("🔄 [ContentView] Sync polling stopped")
     }
 }
 
