@@ -220,10 +220,7 @@ class SupabaseService: ObservableObject {
         do {
             try await client.auth.signOut()
             clearSharedAuthState()
-            // Clear session from shared storage
-            sharedUserDefaults?.removeObject(forKey: "supabaseSession")
-            sharedUserDefaults?.synchronize()
-            print("🟢 ✅ [SupabaseService] User signed out successfully")
+            
             return true
         } catch {
             print("🟢 ❌ [SupabaseService] Failed to sign out: \(error)")
@@ -244,6 +241,8 @@ class SupabaseService: ObservableObject {
     private func clearSharedAuthState() {
         sharedUserDefaults?.removeObject(forKey: "isAuthenticated")
         sharedUserDefaults?.removeObject(forKey: "currentUserId")
+        sharedUserDefaults?.removeObject(forKey: "supabaseSession")
+        sharedUserDefaults?.synchronize()
         print("🟢 [SupabaseService] Cleared shared auth state")
     }
     

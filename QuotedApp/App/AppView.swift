@@ -23,16 +23,17 @@ struct AppView: View {
     .task {
       for await state in SupabaseService.shared.client.auth.authStateChanges {
         if [.initialSession, .signedIn, .signedOut].contains(state.event) {
-          let wasAuthenticated = isAuthenticated
-          isAuthenticated = state.session != nil
-          
-          // Reload widget when authentication state changes
-          if wasAuthenticated != isAuthenticated {
-            print("🔄 [AppView] Auth state changed - reloading widgets (authenticated: \(isAuthenticated))")
-            WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+          await MainActor.run {
+            let wasAuthenticated = isAuthenticated
+            isAuthenticated = state.session != nil
+            if wasAuthenticated && !isAuthenticated {
+              print("🔄 [AppView] User signed out → clearing widget timelines")
+              WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
+            }
           }
         }
       }
     }
   }
 }
+  

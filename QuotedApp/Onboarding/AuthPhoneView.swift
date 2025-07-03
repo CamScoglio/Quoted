@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 import Supabase
+import WidgetKit
 
 //put in 6-digit code that was sent to the phone number (authenticated through Twilio and EnterPhoneNumber.swift)
 //Re-try if code is wrong
@@ -165,14 +166,7 @@ struct AuthPhoneView: View {
             if success {
                 print("🔴 ✅ [AuthPhoneView] Phone verification and authentication successful!")
                 
-                // Create user_daily_quotes row immediately after successful authentication
-                do {
-                    _ = try await SupabaseService.shared.assignRandomQuoteToUser()
-                    print("🔴 ✅ [AuthPhoneView] user_daily_quotes row created for new user")
-                } catch {
-                    print("🔴 ❌ [AuthPhoneView] Failed to create user_daily_quotes row: \(error)")
-                    // Continue to offboarding even if quote assignment fails
-                }
+                WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
                 
                 navigateToOffboarding = true
             } else {

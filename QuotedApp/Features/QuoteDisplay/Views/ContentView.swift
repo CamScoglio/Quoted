@@ -93,13 +93,6 @@ struct ContentView: View {
         }
         .task {
             await loadDailyQuote()
-            
-            // Force widget reload when ContentView appears (user is authenticated)
-            print("🔄 [ContentView] User authenticated - forcing widget reload")
-            WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
-            
-            // Start polling for widget updates
-            await startSyncPolling()
         }
     }
     

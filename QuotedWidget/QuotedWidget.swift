@@ -65,25 +65,7 @@ struct QuotedWidgetProvider: TimelineProvider {
             return
         }
         
-        print("🟢 [Widget Snapshot] User authenticated - getting daily quote")
-        Task {
-            do {
-                let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
-                print("🟢 [Widget Snapshot] Got daily quote: \(dailyQuote?.quoteText ?? "nil")")
-                completion(QuotedWidgetEntry(
-                    date: Date(),
-                    dailyQuote: dailyQuote,
-                    isAuthenticated: true
-                ))
-            } catch {
-                print("🔴 [Widget Snapshot] Error: \(error)")
-                completion(QuotedWidgetEntry(
-                    date: Date(),
-                    dailyQuote: nil,
-                    isAuthenticated: true
-                ))
-            }
-        }
+        
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuotedWidgetEntry>) -> ()) {
@@ -113,32 +95,7 @@ struct QuotedWidgetProvider: TimelineProvider {
         }
         
         print("🟢 [Widget Timeline] User authenticated")
-        
-        // First try to get quote from shared storage (fast path)
-        if let cachedQuote = SupabaseService.shared.getQuoteFromSharedStorage() {
-            print("🟢 [Widget Timeline] Using cached quote: \(cachedQuote.quoteText)")
-            print("🔍 [Widget Timeline] Quote ID: \(cachedQuote.id), Author: \(cachedQuote.authors.name)")
-            
-            // Debug: Check shared UserDefaults directly
-            let lastUpdated = sharedDefaults?.double(forKey: "quoteLastUpdated") ?? 0
-            let lastUpdatedDate = Date(timeIntervalSince1970: lastUpdated)
-            print("🔍 [Widget Timeline] Last updated timestamp: \(lastUpdated) (\(lastUpdatedDate))")
-            
-            // Debug: Check raw shared storage data
-            if let rawData = sharedDefaults?.data(forKey: "currentDailyQuote") {
-                print("🔍 [Widget Timeline] Raw shared data exists, size: \(rawData.count) bytes")
-            } else {
-                print("🔴 [Widget Timeline] No raw shared data found!")
-            }
-            
-            let entry = QuotedWidgetEntry(date: Date(), dailyQuote: cachedQuote, isAuthenticated: true)
-            let tomorrow = Calendar.current.startOfDay(for: Date().addingTimeInterval(24 * 60 * 60))
-            print("🟢 [Widget Timeline] Timeline set to refresh at: \(tomorrow)")
-            completion(Timeline(entries: [entry], policy: .after(tomorrow)))
-            return
-        }
-        
-        // If no cached quote, try to get from database (this may fail due to RLS)
+    
         Task {
             do {
                 let dailyQuote = try await SupabaseService.shared.getUserDailyQuote()
@@ -159,6 +116,7 @@ struct QuotedWidgetProvider: TimelineProvider {
                 // Retry more frequently when we need data
                 completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5 * 60))))
             }
+            return
         }
     }
 }
@@ -168,13 +126,6 @@ struct QuotedWidgetEntry: TimelineEntry {
     let date: Date
     let dailyQuote: DailyQuote?
     let isAuthenticated: Bool
-    
-    // Convenience initializer for authenticated entries with quote
-    init(date: Date, dailyQuote: DailyQuote?, isAuthenticated: Bool = true) {
-        self.date = date
-        self.dailyQuote = dailyQuote
-        self.isAuthenticated = isAuthenticated
-    }
     
     // Computed property to get a safe daily quote (for UI display)
     var safeDailyQuote: DailyQuote {
