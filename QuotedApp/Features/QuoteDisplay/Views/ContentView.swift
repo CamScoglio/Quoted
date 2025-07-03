@@ -12,6 +12,7 @@ struct ContentView: View {
     @State private var currentQuote: DailyQuote?
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     private let supabase = SupabaseService.shared
     
@@ -85,7 +86,11 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Sign Out") {
-                        Task { await supabase.signOut() }
+                        Task { 
+                            print("🔄 [ContentView] User signing out - clearing onboarding flag")
+                            hasCompletedOnboarding = false
+                            await supabase.signOut() 
+                        }
                     }
                     .foregroundColor(.white)
                 }

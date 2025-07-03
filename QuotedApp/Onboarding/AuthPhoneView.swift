@@ -144,7 +144,7 @@ struct AuthPhoneView: View {
     }
     
     private func verifyCode() {
-        Task {
+        Task { @MainActor in
             print("🔴 [AuthPhoneView] Starting code verification process...")
             isLoading = true
             
@@ -169,6 +169,7 @@ struct AuthPhoneView: View {
                 WidgetCenter.shared.reloadTimelines(ofKind: "QuotedWidget")
                 
                 navigateToOffboarding = true
+                
             } else {
                 print("🔴 ❌ [AuthPhoneView] Phone verification failed")
                 alertMessage = "Invalid verification code. Please try again."

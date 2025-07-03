@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct OffboardingView: View {
-    @State private var navigateToMainApp = false
+    @AppStorage("hasCompletedOnboarding") var hasCompletedOnboarding = false
     
     var body: some View {
         NavigationStack {
@@ -17,7 +17,7 @@ struct OffboardingView: View {
                 Spacer()
                 
                 // Success animation/icon with modern styling
-                VStack(spacing: AppLayout.spacingLarge) {
+                VStack(spacing: AppLayout.spacinsgLarge) {
                     // Success checkmark with modern gradient
                     SuccessCheckmark()
                     
@@ -42,7 +42,9 @@ struct OffboardingView: View {
                 VStack(spacing: AppLayout.spacingMedium) {
                     Button {
                         print("🟢 [OffboardingView] Get Started button tapped")
-                        navigateToMainApp = true
+                        print("🟢 [OffboardingView] Setting hasCompletedOnboarding = true")
+                        hasCompletedOnboarding = true
+                        print("🟢 [OffboardingView] 🎉 ONBOARDING COMPLETE! AppView will now show ContentView")
                     } label: {
                         HStack {
                             Text("Get Started")
@@ -61,18 +63,9 @@ struct OffboardingView: View {
             }
             .modernBackground()
             .navigationBarHidden(true)
-            .navigationDestination(isPresented: $navigateToMainApp) {
-                ContentView()
-            }
             .onAppear {
-                print("🟢 [OffboardingView] View appeared - Onboarding completed successfully!")
-                print("🟢 [OffboardingView] User has finished the entire onboarding flow")
-            }
-            .onChange(of: navigateToMainApp) { _, newValue in
-                if newValue {
-                    print("🟢 [OffboardingView] Navigating to main app (ContentView)")
-                    print("🟢 [OffboardingView] 🎉 ONBOARDING FLOW COMPLETE! 🎉")
-                }
+                print("🟢 [OffboardingView] View appeared - User successfully authenticated!")
+                print("🟢 [OffboardingView] Ready to complete onboarding flow")
             }
         }
     }
