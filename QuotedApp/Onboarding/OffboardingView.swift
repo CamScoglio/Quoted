@@ -17,7 +17,7 @@ struct OffboardingView: View {
                 Spacer()
                 
                 // Success animation/icon with modern styling
-                VStack(spacing: AppLayout.spacinsgLarge) {
+                VStack(spacing: AppLayout.spacingLarge) {
                     // Success checkmark with modern gradient
                     SuccessCheckmark()
                     
@@ -25,11 +25,11 @@ struct OffboardingView: View {
                     VStack(spacing: AppLayout.spacingMedium) {
                         Text("You're all set!")
                             .font(AppFonts.largeTitle)
-                            .foregroundColor(AppColors.primaryText)
+                            .foregroundColor(AppColors.lightBackgroundText)
                         
                         Text("Welcome to Quoted! Get ready to discover daily inspiration through beautiful, curated quotes.")
                             .font(AppFonts.body)
-                            .foregroundColor(AppColors.secondaryText)
+                            .foregroundColor(AppColors.lightBackgroundSecondaryText)
                             .multilineTextAlignment(.center)
                             .lineLimit(nil)
                     }
@@ -56,7 +56,7 @@ struct OffboardingView: View {
                     // Optional subtitle with modern typography
                     Text("Start exploring your daily quotes")
                         .font(AppFonts.subheadline)
-                        .foregroundColor(AppColors.secondaryText)
+                        .foregroundColor(AppColors.lightBackgroundSecondaryText)
                 }
                 .padding(.horizontal, AppLayout.paddingLarge)
                 .padding(.bottom, 50)

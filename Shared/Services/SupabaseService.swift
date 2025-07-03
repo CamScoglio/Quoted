@@ -65,9 +65,7 @@ class SupabaseService: ObservableObject {
     
     // MARK: - Phone Authentication Methods
     
-    /// Send OTP to phone number using Supabase's built-in phone auth (with Twilio)
-    /// - Parameter phoneNumber: E.164 formatted phone number (e.g., "+19842021329")
-    /// - Returns: True if SMS sent successfully, false otherwise
+    
     func sendPhoneOTP(_ phoneNumber: String) async -> Bool {
         print("🟢 [SupabaseService] Sending OTP to phone: \(phoneNumber)")
         

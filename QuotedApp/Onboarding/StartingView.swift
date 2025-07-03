@@ -30,12 +30,12 @@ struct StartingView: View {
                     VStack(spacing: AppLayout.spacingMedium) {
                         Text("Welcome to Quoted")
                             .font(AppFonts.largeTitle)
-                            .foregroundColor(AppColors.primaryText)
+                            .foregroundColor(AppColors.lightBackgroundText)
                             .multilineTextAlignment(.center)
                         
                         Text("Discover daily inspiration through curated quotes")
                             .font(AppFonts.title2)
-                            .foregroundColor(AppColors.secondaryText)
+                            .foregroundColor(AppColors.lightBackgroundSecondaryText)
                             .multilineTextAlignment(.center)
                     }
                     .cleanTextSection()

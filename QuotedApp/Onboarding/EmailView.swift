@@ -25,12 +25,12 @@ struct EmailView: View {
                 VStack(spacing: AppLayout.spacingMedium) {
                     Text("Enter your email")
                         .font(AppFonts.largeTitle)
-                        .foregroundColor(AppColors.primaryText)
+                        .foregroundColor(AppColors.lightBackgroundText)
                         .multilineTextAlignment(.center)
                     
                     Text("We'll use this to keep your account secure")
                         .font(AppFonts.body)
-                        .foregroundColor(AppColors.secondaryText)
+                        .foregroundColor(AppColors.lightBackgroundSecondaryText)
                         .multilineTextAlignment(.center)
                 }
                 .cleanTextSection()
@@ -39,7 +39,7 @@ struct EmailView: View {
                 VStack(alignment: .leading, spacing: AppLayout.spacingSmall) {
                     Text("Email Address")
                         .font(AppFonts.headline)
-                        .foregroundColor(AppColors.primaryText)
+                        .foregroundColor(AppColors.lightBackgroundText)
                     
                     TextField("Enter your email", text: $email)
                         .textContentType(.emailAddress)

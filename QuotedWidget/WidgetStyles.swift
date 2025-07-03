@@ -24,6 +24,7 @@ import SwiftUI
     • Labels.authorPrefix       → Text before author ("— " or "by ")
     • IconNames.quote          → Quote bubble icon
  
+ 
  ═══════════════════════════════════════════════════════════════════════════════
  
  💡 PRO TIPS:
@@ -255,7 +256,7 @@ struct WidgetStylesPreviews: PreviewProvider {
                     .frame(height: 60)
                     .overlay(
                         Text("Blue Purple")
-                            .foregroundColor(.white)
+                            .foregroundColor(WidgetStyles.Colors.primaryText)
                             .font(.caption)
                     )
                 
@@ -268,7 +269,7 @@ struct WidgetStylesPreviews: PreviewProvider {
                     .frame(height: 60)
                     .overlay(
                         Text("Blue Cyan")
-                            .foregroundColor(.white)
+                            .foregroundColor(WidgetStyles.Colors.primaryText)
                             .font(.caption)
                     )
             }

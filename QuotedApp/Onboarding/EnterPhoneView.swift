@@ -43,12 +43,12 @@ struct EnterPhoneView: View {
                     VStack(spacing: AppLayout.spacingMedium) {
                         Text("Enter your phone number")
                             .font(AppFonts.largeTitle)
-                            .foregroundColor(AppColors.primaryText)
+                            .foregroundColor(AppColors.lightBackgroundText)
                             .multilineTextAlignment(.center)
                         
                         Text("We'll send you a verification code")
                             .font(AppFonts.body)
-                            .foregroundColor(AppColors.secondaryText)
+                            .foregroundColor(AppColors.lightBackgroundSecondaryText)
                             .multilineTextAlignment(.center)
                     }
                     .cleanTextSection()
@@ -57,12 +57,12 @@ struct EnterPhoneView: View {
                     VStack(alignment: .leading, spacing: AppLayout.spacingSmall) {
                         Text("Phone Number")
                             .font(AppFonts.headline)
-                            .foregroundColor(AppColors.primaryText)
+                            .foregroundColor(AppColors.lightBackgroundText)
                         
                         HStack {
                             Text("+1")
                                 .font(AppFonts.body)
-                                .foregroundColor(AppColors.secondaryText)
+                                .foregroundColor(AppColors.lightBackgroundSecondaryText)
                                 .padding(.leading, 12)
                             
                             TextField("(555) 123-4567", text: $phoneNumber)
@@ -92,13 +92,13 @@ struct EnterPhoneView: View {
                         }) {
                             Image(systemName: agreedToSMS ? "checkmark.square.fill" : "square")
                                 .font(.title3)
-                                .foregroundColor(agreedToSMS ? AppColors.accentText : AppColors.secondaryText)
+                                .foregroundColor(agreedToSMS ? AppColors.accentText : AppColors.lightBackgroundSecondaryText)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("I authorize Quoted to send a text (SMS/MMS) message containing a verification code to the mobile phone number I have provided. I understand that message and data rates may apply, that this message is transactional and not marketing in nature, and that I may revoke my consent at any time prior to completion of the verification process by closing the application or contacting support")
                                 .font(AppFonts.caption)
-                                .foregroundColor(AppColors.primaryText)
+                                .foregroundColor(AppColors.lightBackgroundText)
                         }
                         
                         Spacer()

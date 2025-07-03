@@ -17,69 +17,76 @@ struct ContentView: View {
     private let supabase = SupabaseService.shared
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                // Background gradient
-                if let quote = currentQuote,
-                   let gradient = quote.backgroundGradient,
-                   let startColor = gradient["start"],
-                   let endColor = gradient["end"] {
-                    LinearGradient(
-                        colors: [Color(hex: startColor), Color(hex: endColor)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .ignoresSafeArea()
-                } else {
-                    LinearGradient(
-                        colors: [.blue.opacity(0.6), .purple.opacity(0.8)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .ignoresSafeArea()
-                }
-                
-                VStack(spacing: 30) {
+        NavigationStack {
+            GeometryReader { geometry in
+                ZStack {
+                    // Background gradient
+                    if let quote = currentQuote,
+                       let gradient = quote.backgroundGradient,
+                       let startColor = gradient["start"],
+                       let endColor = gradient["end"] {
+                        LinearGradient(
+                            colors: [Color(hex: startColor), Color(hex: endColor)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .ignoresSafeArea()
+                    } else {
+                        LinearGradient(
+                            colors: [.blue.opacity(0.6), .purple.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .ignoresSafeArea()
+                    }
+                    
+                    // Responsive content container
+                    VStack(spacing: responsiveSpacing(for: geometry.size)) {
                     if isLoading {
                         ProgressView("Loading your daily quote...")
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.adaptiveOverlayText)
                     } else if let quote = currentQuote {
                         QuoteDisplayView(quote: quote)
                     } else if let error = errorMessage {
                         VStack(spacing: 20) {
                             Image(systemName: "exclamationmark.triangle")
                                 .font(.system(size: 40))
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(AppColors.adaptiveOverlayTextSecondary)
                             
                             Text("Error")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.adaptiveOverlayText)
                             
                             Text(error)
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(AppColors.adaptiveOverlayTextSecondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
                         }
                     }
                     
                     // Action buttons
-                    HStack(spacing: 20) {
+                    HStack(spacing: responsiveButtonSpacing(for: geometry.size)) {
                         // New quote button
                         Button(action: { Task { await loadNewQuote() } }) {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Image(systemName: "sparkles")
+                                    .font(responsiveButtonIconFont(for: geometry.size))
                                 Text("New Quote")
+                                    .font(responsiveButtonFont(for: geometry.size))
                             }
-                            .padding()
+                            .padding(responsiveButtonPadding(for: geometry.size))
                             .background(Color.white.opacity(0.2))
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .foregroundColor(AppColors.adaptiveOverlayText)
+                            .cornerRadius(responsiveButtonCornerRadius(for: geometry.size))
                         }
                         .disabled(isLoading)
                     }
                 }
-                .padding()
+                .padding(responsivePadding(for: geometry.size))
+                .frame(maxWidth: maxContentWidth(for: geometry.size), alignment: .center)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
             }
             .navigationTitle("Quoted")
             .navigationBarTitleDisplayMode(.inline)
@@ -92,7 +99,7 @@ struct ContentView: View {
                             await supabase.signOut() 
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.adaptiveOverlayText)
                 }
             }
         }
@@ -182,6 +189,77 @@ struct ContentView: View {
         
         print("🎲 [ContentView] loadNewQuote() completed, isLoading = false")
         isLoading = false
+    }
+    
+    // MARK: - Responsive Layout Helpers
+    
+    /// Calculate responsive spacing based on screen size
+    private func responsiveSpacing(for size: CGSize) -> CGFloat {
+        let baseSpacing: CGFloat = 30
+        let scaleFactor = min(size.width / 390, size.height / 844) // iPhone 12 Pro as base
+        return max(baseSpacing * scaleFactor, 20) // Minimum 20pt spacing
+    }
+    
+    /// Calculate responsive padding based on screen size
+    private func responsivePadding(for size: CGSize) -> CGFloat {
+        let basePadding: CGFloat = 16
+        let scaleFactor = min(size.width / 390, size.height / 844)
+        return max(basePadding * scaleFactor, 12) // Minimum 12pt padding
+    }
+    
+    /// Calculate maximum content width for better readability on large screens
+    private func maxContentWidth(for size: CGSize) -> CGFloat {
+        // On Mac, limit content width for better readability
+        #if targetEnvironment(macCatalyst)
+        return min(size.width * 0.7, 600) // Max 600pt wide or 70% of screen
+        #else
+        return size.width // Full width on iOS
+        #endif
+    }
+    
+    // MARK: - Button Responsive Helpers
+    
+    private func responsiveButtonSpacing(for size: CGSize) -> CGFloat {
+        let scaleFactor = min(size.width / 390, size.height / 844)
+        return max(20 * scaleFactor, 15)
+    }
+    
+    private func responsiveButtonPadding(for size: CGSize) -> CGFloat {
+        let scaleFactor = min(size.width / 390, size.height / 844)
+        return max(16 * scaleFactor, 12)
+    }
+    
+    private func responsiveButtonFont(for size: CGSize) -> Font {
+        let scaleFactor = min(size.width / 390, size.height / 844)
+        
+        #if targetEnvironment(macCatalyst)
+        if scaleFactor > 1.5 {
+            return .title3
+        } else if scaleFactor > 1.2 {
+            return .headline
+        }
+        #endif
+        
+        return .headline
+    }
+    
+    private func responsiveButtonIconFont(for size: CGSize) -> Font {
+        let scaleFactor = min(size.width / 390, size.height / 844)
+        
+        #if targetEnvironment(macCatalyst)
+        if scaleFactor > 1.5 {
+            return .title3
+        } else if scaleFactor > 1.2 {
+            return .headline
+        }
+        #endif
+        
+        return .headline
+    }
+    
+    private func responsiveButtonCornerRadius(for size: CGSize) -> CGFloat {
+        let scaleFactor = min(size.width / 390, size.height / 844)
+        return max(10 * scaleFactor, 8)
     }
     
     /// Start polling for widget-triggered updates

@@ -45,13 +45,13 @@ struct AuthPhoneView: View {
                     VStack(spacing: AppLayout.spacingMedium) {
                         Text("Enter verification code")
                             .font(AppFonts.largeTitle)
-                            .foregroundColor(AppColors.primaryText)
+                            .foregroundColor(AppColors.lightBackgroundText)
                             .multilineTextAlignment(.center)
                         
                         VStack(spacing: AppLayout.spacingSmall) {
                             Text("We sent a 6-digit code to")
                                 .font(AppFonts.body)
-                                .foregroundColor(AppColors.secondaryText)
+                                .foregroundColor(AppColors.lightBackgroundSecondaryText)
                             
                             Text(phoneNumber)
                                 .font(AppFonts.body)
@@ -65,13 +65,14 @@ struct AuthPhoneView: View {
                     VStack(alignment: .leading, spacing: AppLayout.spacingSmall) {
                         Text("Verification Code")
                             .font(AppFonts.headline)
-                            .foregroundColor(AppColors.primaryText)
+                            .foregroundColor(AppColors.lightBackgroundText)
                         
                         TextField("000000", text: $verificationCode)
                             .keyboardType(.numberPad)
                             .textContentType(.oneTimeCode)
                             .multilineTextAlignment(.center)
                             .font(.title2)
+                            .textFieldColors() // Explicit color handling for Mac
                             .modernTextField()
                             .onChange(of: verificationCode) { _, newValue in
                                 // Limit to 6 digits

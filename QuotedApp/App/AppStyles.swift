@@ -42,6 +42,32 @@ struct AppColors {
     static let primaryText = Color.primary
     static let secondaryText = Color.secondary
     static let accentText = primaryBlue
+    
+    // Text colors for light backgrounds (onboarding, etc.)
+    static let lightBackgroundText = Color.black
+    static let lightBackgroundSecondaryText = Color.gray
+    
+    // Adaptive colors for colored backgrounds
+    static let overlayText = Color.white
+    static let overlayTextSecondary = Color.white.opacity(0.9)
+    static let overlayTextTertiary = Color.white.opacity(0.7)
+    
+    // Platform-adaptive text colors
+    static let adaptiveOverlayText: Color = {
+        #if targetEnvironment(macCatalyst)
+        return Color.primary
+        #else
+        return Color.white
+        #endif
+    }()
+    
+    static let adaptiveOverlayTextSecondary: Color = {
+        #if targetEnvironment(macCatalyst)
+        return Color.secondary
+        #else
+        return Color.white.opacity(0.9)
+        #endif
+    }()
 }
 
 // MARK: - Typography
@@ -88,11 +114,19 @@ struct ModernCardStyle: ViewModifier {
 struct ModernTextFieldStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
+            .foregroundColor(AppColors.lightBackgroundText) // Explicit input text color
+            .accentColor(AppColors.accentText) // Cursor color
+            .tint(AppColors.accentText) // iOS 15+ cursor and selection color
             .padding(AppLayout.paddingMedium)
             .background(
                 RoundedRectangle(cornerRadius: AppLayout.cornerRadius)
                     .fill(Color.white.opacity(0.8))
                     .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+            )
+            .overlay(
+                // This helps ensure placeholder text is also properly colored
+                RoundedRectangle(cornerRadius: AppLayout.cornerRadius)
+                    .stroke(Color.clear)
             )
     }
 }
@@ -146,7 +180,7 @@ struct ModernBackButton: View {
         Button(action: action) {
             Image(systemName: "arrow.left")
                 .font(.title2)
-                .foregroundColor(AppColors.primaryText)
+                .foregroundColor(AppColors.lightBackgroundText)
                 .frame(width: 44, height: 44)
                 .background(
                     Circle()
@@ -160,7 +194,7 @@ struct ModernBackButton: View {
 struct ModernProgressView: View {
     var body: some View {
         ProgressView()
-            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            .progressViewStyle(CircularProgressViewStyle(tint: AppColors.adaptiveOverlayText))
             .scaleEffect(0.8)
     }
 }
@@ -201,7 +235,7 @@ struct AppIconView: View {
             
             Image(systemName: "quote.bubble.fill")
                 .font(.system(size: 50))
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.adaptiveOverlayText)
         }
     }
 }
@@ -230,5 +264,12 @@ extension View {
     
     func modernBackground() -> some View {
         background(AppColors.mainGradient.ignoresSafeArea())
+    }
+    
+    /// Ensures text field has proper colors on all platforms
+    func textFieldColors() -> some View {
+        self.foregroundColor(AppColors.lightBackgroundText)
+            .accentColor(AppColors.accentText)
+            .tint(AppColors.accentText)
     }
 } 
